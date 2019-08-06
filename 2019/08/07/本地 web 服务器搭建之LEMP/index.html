@@ -28,28 +28,28 @@
 <h1 id="0x01-实现"><a href="#0x01-实现" class="headerlink" title="0x01 实现"></a>0x01 实现</h1><h2 id="1-环境搭建过程"><a href="#1-环境搭建过程" class="headerlink" title="1. 环境搭建过程"></a>1. 环境搭建过程</h2><p><strong>目标环境</strong></p>
 <p>linux+nginx+php- fpm+mysql</p>
 <h3 id="1-1-安装-Linux-系统"><a href="#1-1-安装-Linux-系统" class="headerlink" title="1.1 安装 Linux 系统"></a>1.1 安装 Linux 系统</h3><p>Linux 系统使用 Ubuntu-18.04 版本，使用 VMware Workstation 安装其镜像，Ubuntu 镜像在其官网上下载。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564387874274.png" alt="1564387874274"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564387874274.png" alt></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update &amp; sudo apt-get upgrade</span><br></pre></td></tr></table></figure>
 
 <h3 id="1-2-安装-Nginx"><a href="#1-2-安装-Nginx" class="headerlink" title="1.2 安装 Nginx"></a>1.2 安装 Nginx</h3><p>在 Ubuntu 中安装 Nginx，只需要在终端输入以下命令即可：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install nginx</span><br></pre></td></tr></table></figure>
 
 <p>在浏览器中浏览 nginx 默认网页，http://主机地址，说明安装成功</p>
-<p><a href="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564392035766.png" target="_blank" rel="noopener">Ngnix homepage</a></p>
+<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564392035766.png" alt></p>
 <h3 id="1-3-安装-Php-fpm"><a href="#1-3-安装-Php-fpm" class="headerlink" title="1.3 安装 Php-fpm"></a>1.3 安装 Php-fpm</h3><p>在终端输入以下命令即可：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get intall php-fpm</span><br></pre></td></tr></table></figure>
 
 <p>查看服务是否运行：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl status php7.2-fpm.service</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564392367696.png" alt="1564392367696"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564392367696.png" alt></p>
 <h3 id="1-4-安装-Mysql"><a href="#1-4-安装-Mysql" class="headerlink" title="1.4 安装 Mysql"></a>1.4 安装 Mysql</h3><p>在终端输入以下命令安装 mysql 和 php 的 mysql 支持：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install mysql-server mysql-client php-mysql</span><br></pre></td></tr></table></figure>
 
 <p>安装完成后，检查 mysql 服务器是否运行：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl mysql.service</span><br></pre></td></tr></table></figure>
 
-<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564659362935.png" alt="1564659362935"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564659362935.png" alt></p>
 <h2 id="2-配置自己的网站"><a href="#2-配置自己的网站" class="headerlink" title="2. 配置自己的网站"></a>2. 配置自己的网站</h2><h3 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h3><p>搭建本地网站 <a href="http://www.jaylen.com，配置" target="_blank" rel="noopener">www.jaylen.com，配置</a> Nginx 使其支持 php，本地网站显示一张图片，图片下方有个评论界面，可以输入评论，显示到网页中，评论会存到 mysql 数据库中。</p>
 <h3 id="2-1-域名映射"><a href="#2-1-域名映射" class="headerlink" title="2.1 域名映射"></a>2.1 域名映射</h3><p>要在本地网络中，通过浏览器访问到 <a href="http://www.jaylen.com，需要修改主机的" target="_blank" rel="noopener">www.jaylen.com，需要修改主机的</a> hosts 文件，在 <code>/etc/hsots</code> 添加一行：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">your-ip-add www.jaylen.com</span><br></pre></td></tr></table></figure>
@@ -77,13 +77,13 @@
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;html&gt;</span><br><span class="line">     &lt;body&gt;</span><br><span class="line">         &lt;head&gt;</span><br><span class="line">             &lt;title&gt;</span><br><span class="line">                 jaylen&apos;s homepage</span><br><span class="line">             &lt;/title&gt;</span><br><span class="line">         &lt;/head&gt;</span><br><span class="line">         &lt;h1&gt;Welcome to Jaylen&apos;s Homepage&lt;/h1&gt;</span><br><span class="line">         &lt;p&gt;Website is under construction, wait...&lt;/p&gt;</span><br><span class="line">         &lt;?php</span><br><span class="line">             echo phpinfo();</span><br><span class="line">         ?&gt;</span><br><span class="line">     &lt;/bdoy&gt;</span><br><span class="line"> &lt;/html&gt;</span><br></pre></td></tr></table></figure>
 
 <p>通过浏览器浏览网站 <a href="http://www.jaylen.com" target="_blank" rel="noopener">www.jaylen.com</a></p>
-<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564820064946.png" alt="1564820064946"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564820064946.png" alt></p>
 <p>浏览 <a href="http://www.jaylen.com/index.php" target="_blank" rel="noopener">www.jaylen.com/index.php</a></p>
-<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564820032466.png" alt="1564820032466"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564820032466.png" alt></p>
 <p>浏览 <a href="http://www.jaylen.com/index.php" target="_blank" rel="noopener">www.jaylen.com/index.php</a></p>
 <p>测试完成，没有问题。</p>
 <p>进一步完善网页内容，使其显示一张图片，图片下方带有评论输入框，可以提交评论，提交的评论存到主机的 mysql 数据库中，而后显示在评论区，最后完成的大致如下图，简陋的不行。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564840770425.png" alt="1564840770425"><br>在 mysql 中创建一个新用户，并授权 INSERT、SELECT 权限，评论内容需要存到数据库，并读取数据库内容。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564840770425.png" alt><br>在 mysql 中创建一个新用户，并授权 INSERT、SELECT 权限，评论内容需要存到数据库，并读取数据库内容。</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt;</span><br><span class="line">CREATE USER &apos;user101&apos;@&apos;localhost&apos;</span><br><span class="line">  IDENTIFIED BY &apos;webdev101@Webdev102&apos;;</span><br><span class="line">GRANT INSERT,SELECT</span><br><span class="line">  ON *.*</span><br><span class="line">  TO &apos;user101&apos;@&apos;localhost&apos;</span><br><span class="line">  WITH GRANT OPTION;</span><br></pre></td></tr></table></figure>
 
 <p>刷新授权表，退出，</p>
@@ -109,7 +109,7 @@
 
 <p>连接数据库的操作，单独放到 <code>connec-mysql.php</code> 文件中。</p>
 <p>在网页中测试下提交评论，</p>
-<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564841954745.png" alt="1564841954745"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564841954745.png" alt></p>
 <h3 id="2-5-问题"><a href="#2-5-问题" class="headerlink" title="2.5 问题"></a>2.5 问题</h3><p>记录搭建自己本地网络过程中遇到的问题。</p>
 <ol>
 <li><p>配置 Nginx 使其支持 php 时，访问 <a href="http://localhsot/index.php，出现" target="_blank" rel="noopener">http://localhsot/index.php，出现</a> <code>502 Bad Gateway</code> 错误，查看 Nginx 错误日志 <code>/var/log/nginx/error.log</code> ，找到错误记录如下：</p>
@@ -199,11 +199,11 @@
 <p> –</p>
 <h3 id="3-2-加固-Nginx"><a href="#3-2-加固-Nginx" class="headerlink" title="3.2 加固 Nginx"></a>3.2 加固 Nginx</h3><p><strong>关闭 Server Token</strong></p>
 <p>Nginx 默认开启 Server Token（显示版本号），这样使得 Nginx 的版本号很容易被获取，如下图为连接域名不存在资源时的返回页面，可以看到 Nginx 的版本号</p>
-<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564802848522.png" alt="1564802848522"><br>在 <code>/etc/nginx/nginx.conf</code> 中 http 块中添加（去掉注释即可）：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564802848522.png" alt><br>在 <code>/etc/nginx/nginx.conf</code> 中 http 块中添加（去掉注释即可）：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">server_tokens off</span><br></pre></td></tr></table></figure>
 
 <p>关闭后，访问域名下不存在的资源，返回页面中没有了 Nginx 的版本号 信息。</p>
-<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564815315221.png" alt="1564815315221"></p>
+<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564815315221.png" alt></p>
 <h3 id="3-2-加固-mysql"><a href="#3-2-加固-mysql" class="headerlink" title="3.2 加固 mysql"></a>3.2 加固 mysql</h3><p>运行 <code>mysql_secure_installation</code> 工具（安装 mysql 后自带的 shell 脚本），进行 mysql 的安全检查，</p>
 <p>根据提示，设置密码为最高级别，并为 root 用户设置密码，最后同意以下选项：</p>
 <ul>
