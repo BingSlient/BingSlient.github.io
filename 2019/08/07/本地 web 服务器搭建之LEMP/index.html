@@ -128,8 +128,6 @@
 <p>这样实际导致 <code>$comment</code> 变量展开后是一个标识符，而不是字符串，需要在外面添加额外的双引号，具体处理如下，注意在单引号中 <code>$</code> 不会被识别成特殊字符，因此不会展开变量，而双引号中不能直接包含双引号，所以就成了下面的结果。</p>
 <figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$sql = <span class="string">"INSERT INTO comments (comment) VALUES ('"</span>.$comment.<span class="string">"')"</span>;</span><br></pre></td></tr></table></figure>
 
-
-
 </li>
 </ol>
 <h2 id="3-本地服务器加固"><a href="#3-本地服务器加固" class="headerlink" title="3.本地服务器加固"></a>3.本地服务器加固</h2><h3 id="3-1-加固-Linux-系统"><a href="#3-1-加固-Linux-系统" class="headerlink" title="3.1 加固 Linux 系统"></a>3.1 加固 Linux 系统</h3><p><strong>时刻保持系统和软件为最新版本</strong></p>
@@ -143,19 +141,20 @@
 <p>在使用和管理服务器时，往往我们需要远程登陆服务器，这就需要我们保证远程登陆过程的安全性。以下步骤一定程度提高了远程登陆的安全性。</p>
 <ol>
 <li>强制使用高强度用户密码（数字、字母、字符的组合且长度14位以上）</li>
-<li>改变 SSH 默认的端口（22）为随机端口</li>
+<li>更改 SSH 默认的端口（22）为随机端口</li>
 <li>禁止 root 身份的远程登陆</li>
-<li>使用公钥验证机制进行远程登陆</li>
+<li>使用公钥认证机制进行远程登陆</li>
 <li>使用 Linux 标准用户而不是 root 用户执行上述操作，并且该用户的权限可提升成 root 权限</li>
 </ol>
 <p>现以 Ubuntu 系统为例，完成上述操作：</p>
+<p><strong>强制使用高强度用户密码</strong></p>
 <p>要强制用户使用高强度密码，需要安装额外的模块 <code>libpam-cracklib</code></p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install libpam-cracklib</span><br></pre></td></tr></table></figure>
 
 <p>在 Ubuntu 中，密码策略（规定密码的长度，字符等）定义在 <code>/etc/pam.d/common-password</code> 文件中，如果要规定，密码长度为 14，包含大小写字符数字和字符，在文件中，在 <code>pam_unix.so</code>的前一行，添加：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">password required pam_cracklib.so try_first_pass retry=3 minlen=14 lcredit=-1 ucredit=-1 dcredit=-1 ocredit=-1 difok=2 reject_username</span><br></pre></td></tr></table></figure>
 
-<p>上述配置的选项的描述如下：</p>
+<p>上述配置的选项的描述如下，详情参考 <a href="http://www.linux-pam.org/Linux-PAM-html/sag-pam_cracklib.html" target="_blank" rel="noopener">libpam-cracklib 文档</a>：</p>
 <table>
 <thead>
 <tr>
@@ -196,13 +195,74 @@
 <td>禁止用户名作为密码</td>
 </tr>
 </tbody></table>
-<h3 id="3-2-加固-Nginx"><a href="#3-2-加固-Nginx" class="headerlink" title="3.2 加固 Nginx"></a>3.2 加固 Nginx</h3><p><strong>关闭 Server Token</strong></p>
+<p>==总之规定各种字符类型的个数，要使用负数，其绝对值表示该类型字符至少有多少个。==</p>
+<p><strong>更改 SSH 默认的端口（22）为随机端口</strong></p>
+<p><strong>禁止 root 身份的远程登陆</strong></p>
+<p>修改 ssh-server 的配置文件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/ssh/sshd_config</span><br></pre></td></tr></table></figure>
+
+<p>找到 <code># Port 22</code> 更改为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Port 2019</span><br></pre></td></tr></table></figure>
+
+<p>找到 <code>#PermitRootLogin</code>，更改为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PermitRootLogin no</span><br></pre></td></tr></table></figure>
+
+<p>远程登陆则需要指定该端口执行登陆，而且无法使用 root 用户登陆</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sss username@ip-addr -p 2019</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用公钥认证机制进行远程登陆</strong></p>
+<p>SSH 登陆 提供<a href="https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/" target="_blank" rel="noopener">公钥认证机制</a>的登陆，即不需要密码的登陆方式，但是需要客户端生成公钥和私钥，并将公钥发送给服务端，服务端将公钥添加到相应用户的配置文件中。</p>
+<p>首先客户端需要生成，密钥对：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa -b 4096</span><br></pre></td></tr></table></figure>
+
+<p>使用默认文件名，一路 <strong>Enter</strong> 最后，生成的密钥对文件在  <code>~/.ssh/</code> 目录下，其中 <code>id_rsa</code> 为私钥，<code>id_rsa.pub</code> 为公钥。</p>
+<p>接着使用将公钥文件上传到服务器：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-copy-id username@ip-addr -p portnum</span><br></pre></td></tr></table></figure>
+
+<p>该命令会把公钥文件的内容，写入到 <code>/home/username/ssh/authorized_keys</code> 文件中，所以也可以手动添加内容。如此一来就可以 <code>username</code> 的身份，不使用密码登陆服务器了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -p 2019 username@ip-addr</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-加固-Nginx"><a href="#3-2-加固-Nginx" class="headerlink" title="3.2 加固 Nginx"></a>3.2 加固 Nginx</h3><p><strong>防止信息泄露</strong></p>
 <p>Nginx 默认开启 Server Token（显示版本号），这样使得 Nginx 的版本号很容易被获取，如下图为连接域名不存在资源时的返回页面，可以看到 Nginx 的版本号</p>
 <p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564802848522.png" alt><br>在 <code>/etc/nginx/nginx.conf</code> 中 http 块中添加（去掉注释即可）：</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">server_tokens off</span><br></pre></td></tr></table></figure>
 
 <p>关闭后，访问域名下不存在的资源，返回页面中没有了 Nginx 的版本号 信息。</p>
 <p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564815315221.png" alt></p>
+<p><strong>增加访问控制策略</strong></p>
+<p>Nginx 可以使用 <code>allow</code> 和 <code>deny</code> 指令在配置文件中允许或禁止特定 IP 的访问， 编辑 Niginx 配置文件 <code>/etc/nginx/conf.d/jaylen.com.conf</code>，只允许 192.168.47.129 192.168.47.130 访问 网站 <a href="http://www.jaylen.com" target="_blank" rel="noopener">www.jaylen.com</a> </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">#  server configuration</span><br><span class="line">server &#123;</span><br><span class="line">    listen 80; </span><br><span class="line">    listen [::]:80;</span><br><span class="line"></span><br><span class="line">    # IPs access control</span><br><span class="line">    allow 192.168.47.129;</span><br><span class="line">    allow 192.168.47.130;</span><br><span class="line">    deny all;</span><br><span class="line">        </span><br><span class="line">    root /var/www/jaylen.com;</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用 TLS 加固 Nginx</strong></p>
+<p><a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank" rel="noopener">TLS</a> 可以加密客户端和服务端通信的数据，降低信息泄露的风险。对于本地网站可以使用 <a href="https://en.wikipedia.org/wiki/Transport_Layer_Security" target="_blank" rel="noopener">SSL 自签 证书</a> 实现 HTTPS 连接。当然在公网中使用的网站，通常会使用 CA 认证的证书，要免费使用 SSL 证书，可参考：</p>
+<p><a href="https://www.howtoforge.com/tutorial/nginx-with-letsencrypt-ciphersuite/#step-install-letsencrypt-and-generate-certificates" target="_blank" rel="noopener">How to Install Nginx with Let’s encrypt and get A+ from SSLLabs Test</a></p>
+<p>要在 Nginx 配置自签证书，首先在配置目录下建一个文件夹，进到文件夹中：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo mkdir /etc/nginx/ssl/</span><br><span class="line"><span class="built_in">cd</span> /etc/nginx/ssl</span><br></pre></td></tr></table></figure>
+
+<p>生成密钥：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo openssl genrsa -aes256 -out nginx.key 1024</span><br></pre></td></tr></table></figure>
+
+<p>接着生成 <a href="https://en.wikipedia.org/wiki/Certificate_signing_request" target="_blank" rel="noopener">CSR</a>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo openssl req -new -key nginx.key -out nginx.csr</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">Enter pass phrase for nginx.key:</span><br><span class="line">Can&apos;t load /home/jaylen/.rnd into RNG</span><br><span class="line">140067713049024:error:2406F079:random number generator:RAND_load_file:Cannot open file:../crypto/rand/randfile.c:88:Filename=/home/jaylen/.rnd</span><br><span class="line">You are about to be asked to enter information that will be incorporated</span><br><span class="line">into your certificate request.</span><br><span class="line">What you are about to enter is what is called a Distinguished Name or a DN.</span><br><span class="line">There are quite a few fields but you can leave some blank</span><br><span class="line">For some fields there will be a default value,</span><br><span class="line">If you enter &apos;.&apos;, the field will be left blank.</span><br><span class="line">-----</span><br><span class="line">Country Name (2 letter code) [AU]:CN </span><br><span class="line">State or Province Name (full name) [Some-State]:Guangdong</span><br><span class="line">Locality Name (eg, city) []:Guangzhou</span><br><span class="line">Organization Name (eg, company) [Internet Widgits Pty Ltd]:IT</span><br><span class="line">Organizational Unit Name (eg, section) []:IT</span><br><span class="line">Common Name (e.g. server FQDN or YOUR name) []:www.jaylen.com</span><br><span class="line">Email Address []:jaylen@gmail.com</span><br><span class="line"></span><br><span class="line">Please enter the following &apos;extra&apos; attributes</span><br><span class="line">to be sent with your certificate request</span><br><span class="line">A challenge password []:admin           </span><br><span class="line">An optional company name []:IT</span><br></pre></td></tr></table></figure>
+
+<p>最后，签发证书：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo openssl x509 -req -days 365 -in nginx.csr -signkey nginx.key -out nginx.crt</span><br></pre></td></tr></table></figure>
+
+<p>成功签发：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ignkey nginx.key -out nginx.crt</span><br><span class="line">Signature ok</span><br><span class="line">subject=C = CN, ST = Guangdong, L = Guangzhou, O = IT, OU = IT, CN = www.jaylen.com, emailAddress = jaylen@gmail.com</span><br><span class="line">Getting Private key</span><br><span class="line">Enter pass phrase for nginx.key:</span><br></pre></td></tr></table></figure>
+
+<p>接着在 <code>/etc/nginx/conf.d/jaylen.com.conf</code> 中修改：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 443 ssl;</span><br><span class="line">    ssl_certificate /etc/nginx/ssl/nginx.crt;</span><br><span class="line">    ssl_certificate_key /etc/nginx/ssl/nginx.key;</span><br><span class="line">    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2;</span><br></pre></td></tr></table></figure>
+
+<p>重新加载 Nginx 配置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo nginx -s reload</span><br></pre></td></tr></table></figure>
+
+<p>提示输入之前步骤设置的密码，输入即可。</p>
+<p>其它 加固措施，可仔细阅读：</p>
+<p><a href="https://www.cyberciti.biz/tips/linux-unix-bsd-nginx-webserver-security.html" target="_blank" rel="noopener">Top 25 Nginx Web Server Best Security Practices</a></p>
+<p><a href="https://geekflare.com/nginx-webserver-security-hardening-guide/" target="_blank" rel="noopener">Nginx Web Server Security and Hardening Guide</a></p>
 <h3 id="3-3-加固-mysql"><a href="#3-3-加固-mysql" class="headerlink" title="3.3 加固 mysql"></a>3.3 加固 mysql</h3><p>运行 <code>mysql_secure_installation</code> 工具（安装 mysql 后自带的 shell 脚本），进行 mysql 的安全检查，</p>
 <p>根据提示，设置密码为最高级别，并为 root 用户设置密码，最后同意以下选项：</p>
 <ul>
@@ -226,6 +286,9 @@
 <p>[7] <a href="https://blog.csdn.net/qq_15936309/article/details/51859761" target="_blank" rel="noopener">Unknown column &#39;&#39; in &#39;field list&#39;解决方案</a></p>
 <p>[8] <a href="https://lemp.io/" target="_blank" rel="noopener">What’s a LEMP stack?</a></p>
 <p>[9] <a href="https://www.rosehosting.com/blog/how-to-secure-your-lemp-stack/" target="_blank" rel="noopener">How to secure LEMP stack</a></p>
+<p>[10] <a href="https://www.linode.com/docs/security/authentication/use-public-key-authentication-with-ssh/" target="_blank" rel="noopener">Use Public Key Authentication with SSH</a></p>
+<p>[11] <a href="https://www.cyberciti.biz/tips/linux-unix-bsd-nginx-webserver-security.html" target="_blank" rel="noopener">Top 25 Nginx Web Server Best Security Practices</a></p>
+<p>[12] <a href="https://geekflare.com/nginx-webserver-security-hardening-guide/" target="_blank" rel="noopener">Nginx Web Server Security and Hardening Guide</a></p>
 </div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">BingSlient</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://bingslient.github.io/2019/08/07/本地 web 服务器搭建之LEMP/">https://bingslient.github.io/2019/08/07/本地 web 服务器搭建之LEMP/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://bingslient.github.io">BingSlient's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/LEMP/">LEMP    </a><a class="post-meta__tags" href="/tags/LEMP-加固/">LEMP 加固    </a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/lemp.jpeg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-buttom"><i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lozad post-qr-code__img" data-src="/img/wechat.jpg"><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lozad post-qr-code__img" data-src="/img/alipay.jpg"><div class="post-qr-code__desc">支付寶</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"></nav></div></div><footer><div class="layout" id="footer"><div class="copyright">&copy;2019 By BingSlient</div><div class="framework-info"><span>驱动 </span><a href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly"><span>Butterfly</span></a></div><div class="footer_custom_text">Photo by <a href="https://unsplash.com/@pawel_czerwinski">Paweł Czerwiński</a> on Unsplash.</div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><section class="rightside" id="rightside"><i class="fa fa-book" id="readmode" title="阅读模式"> </i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换">繁</a><i class="fa fa-moon-o nightshift" id="nightshift" title="夜间模式"></i></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({
   tex2jax: {
     inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
