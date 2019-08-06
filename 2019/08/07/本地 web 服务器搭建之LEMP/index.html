@@ -195,8 +195,6 @@
 <td>禁止用户名作为密码</td>
 </tr>
 </tbody></table>
-<p> –</p>
-<p> –</p>
 <h3 id="3-2-加固-Nginx"><a href="#3-2-加固-Nginx" class="headerlink" title="3.2 加固 Nginx"></a>3.2 加固 Nginx</h3><p><strong>关闭 Server Token</strong></p>
 <p>Nginx 默认开启 Server Token（显示版本号），这样使得 Nginx 的版本号很容易被获取，如下图为连接域名不存在资源时的返回页面，可以看到 Nginx 的版本号</p>
 <p><img src="https://cdn.jsdelivr.net/gh/BingSlient/WebSecurityLearning/WebSecurityBasics/images/1564802848522.png" alt><br>在 <code>/etc/nginx/nginx.conf</code> 中 http 块中添加（去掉注释即可）：</p>
