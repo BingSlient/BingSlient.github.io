@@ -1,0 +1,216 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><title>使用Hexo 和 Github Pages 搭建 个人博客 | BingSlient's Blog</title><meta name="description" content="使用Hexo 和 Github Pages 搭建 个人博客"><meta name="keywords" content="hexo,github pages,博客"><meta name="author" content="BingSlient"><meta name="copyright" content="BingSlient"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><meta http-equiv="x-dns-prefetch-control" content="on"><link rel="canonical" href="https://bingslient.github.io/2019/08/06/使用Hexo 和Github搭建个人博客/"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="使用Hexo 和 Github Pages 搭建 个人博客"><meta name="twitter:description" content="使用Hexo 和 Github Pages 搭建 个人博客"><meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg"><meta property="og:type" content="article"><meta property="og:title" content="使用Hexo 和 Github Pages 搭建 个人博客"><meta property="og:url" content="https://bingslient.github.io/2019/08/06/使用Hexo 和Github搭建个人博客/"><meta property="og:site_name" content="BingSlient's Blog"><meta property="og:description" content="使用Hexo 和 Github Pages 搭建 个人博客"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="prev" title="在 Ubuntu18.04 安装 LEMP，构建本地网站" href="https://bingslient.github.io/2019/08/07/本地 web 服务器搭建之LEMP/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://xxx/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  highlight_copy: 'true',
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    title: '添加书签',
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天'
+
+  
+}</script></head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div class="auto_open" id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#背景知识"><span class="toc-number">1.</span> <span class="toc-text">背景知识</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#搭建环境"><span class="toc-number">2.</span> <span class="toc-text">搭建环境</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#安装必要软件"><span class="toc-number">2.1.</span> <span class="toc-text">安装必要软件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置-Git-SSH-key"><span class="toc-number">2.2.</span> <span class="toc-text">配置 Git SSH key</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#配置-Hexo"><span class="toc-number">2.3.</span> <span class="toc-text">配置 Hexo</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#使用-Github-Page-仓库"><span class="toc-number">2.4.</span> <span class="toc-text">使用 Github Page 仓库</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#写博客"><span class="toc-number">3.</span> <span class="toc-text">写博客</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#创建一个新页面"><span class="toc-number">3.1.</span> <span class="toc-text">创建一个新页面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#生成静态文件"><span class="toc-number">3.2.</span> <span class="toc-text">生成静态文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#发布博文到-Github-Page"><span class="toc-number">3.3.</span> <span class="toc-text">发布博文到 Github Page</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考资料"><span class="toc-number">4.</span> <span class="toc-text">参考资料</span></a></li></ol></div></div></div><div id="content-outer"><div id="top-container" style="background-image: url(https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/post.jpg)"><div id="page-header"><span class="pull-left"> <a class="blog_title" id="site-name" href="/">BingSlient's Blog</a></span><div class="open toggle-menu pull-right"><div class="menu-icon-first"></div><div class="menu-icon-second"></div><div class="menu-icon-third"></div></div><span class="pull-right menus"><div class="mobile_author_icon"><img class="lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'"><div class="mobile_author-info__description"></div></div><hr><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> Home</span></a><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> Archives</span></a><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> Tags</span></a><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> Categories</span></a><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> About</span></a><script>document.body.addEventListener('touchstart', function(){ });</script></div></span><span class="pull-right"></span></div><div id="post-info"><div id="post-title"><div class="posttitle">使用Hexo 和 Github Pages 搭建 个人博客</div></div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2019-08-06<span class="post-meta__separator">|</span><i class="fa fa-history" aria-hidden="true"></i> 更新于 2019-08-08</time></div></div></div><div class="layout layout_post" id="content-inner">   <article id="post"><div class="article-container" id="post-content"><h1 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a><strong>背景知识</strong></h1><p><a href="https://hexo.io/zh-cn/" target="_blank" rel="noopener">Hexo</a> 是一款基于 Node.js 用于快速搭建博客的框架，有了它就可以完成完成个人博客的构建，它会帮你构建博客的整个框架，你只需要会使用Markdown 写博客即可。</p>
+<p><a href="https://help.github.com/en/articles/what-is-github-pages" target="_blank" rel="noopener">Github Page</a> 是 Github 提供的静态网站托管服务，可从 Github 仓库中展示你的个人、组织或者项目的静态网页。</p>
+<h1 id="搭建环境"><a href="#搭建环境" class="headerlink" title="搭建环境"></a>搭建环境</h1><p><strong>目标环境</strong>：</p>
+<p>windows10 + Node.js + Hexo + Git</p>
+<h2 id="安装必要软件"><a href="#安装必要软件" class="headerlink" title="安装必要软件"></a>安装必要软件</h2><p><strong>安装 Node.js</strong></p>
+<p><a href="https://nodejs.org/zh-cn/" target="_blank" rel="noopener">下载安装包</a> 安装</p>
+<p>查看是否安装成功：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm --version</span><br></pre></td></tr></table></figure>
+
+<p><strong>安装 Hexo</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-cli -g</span><br></pre></td></tr></table></figure>
+
+<p>查看是否安装成功：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo --version</span><br></pre></td></tr></table></figure>
+
+<p><strong>安装 Git</strong></p>
+<p><a href="https://git-scm.com/" target="_blank" rel="noopener">下载安装包</a> 安装</p>
+<h2 id="配置-Git-SSH-key"><a href="#配置-Git-SSH-key" class="headerlink" title="配置 Git SSH key"></a>配置 Git SSH key</h2><p>要使用无密码方式连接到 Github仓库，需要使用公钥认证机制。我们需要在主机上生成公钥和私钥密码对，并将公钥配置到个人的Github账户中。</p>
+<p>打开一个 Git 命令终端 Git Bash：</p>
+<p><strong>生成 SSH key</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa -b 4096 -C <span class="string">"your_email@example.com"</span></span><br></pre></td></tr></table></figure>
+
+<p>将上述邮箱改成自己的邮箱，按提示，一路 <strong>Enter</strong> ，默认的产生的 公钥和私钥文件 在 <code>/c/Users/you/.ssh/</code> 目录下，其中 <code>id_rsa</code> 为私钥，<code>id_rsa.pub</code> 为私钥。</p>
+<p><strong>添加 SSH key 到 ssh-agent</strong></p>
+<p>如果使用了 Github Desktop，可以忽略这步。</p>
+<p>打开 ssh-agent：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">eval</span> $(ssh-agent -s)</span><br></pre></td></tr></table></figure>
+
+<p>添加 SSH 私钥 到 ssh-agent</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-add ~/.ssh/id_rsa</span><br></pre></td></tr></table></figure>
+
+<p><strong>添加 SSH key 到个人的 Github 账户</strong></p>
+<p>复制公钥文件 <code>id_rsa.pub</code> 中的内容</p>
+<p>打开 Github 账户的设置页面，找到 ==SSH and GPG keys== 选项，新建一个 SSH key，将复制的内容粘贴到 key 输入框中，最后确认添加 SSH key。</p>
+<h2 id="配置-Hexo"><a href="#配置-Hexo" class="headerlink" title="配置 Hexo"></a>配置 Hexo</h2><p><strong>初始化一个博客目录</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">hexo init blog</span><br><span class="line"><span class="built_in">cd</span> blog</span><br><span class="line">npm install</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用主题</strong></p>
+<p>Hexo 自带的主题相当的简陋，所以Hexo 提供了丰富的 Blog <a href="https://hexo.io/themes/" target="_blank" rel="noopener">主题</a>。</p>
+<p>个人喜欢的一个主题 <a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank" rel="noopener">Butterfly</a></p>
+<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/blog_screen.png" alt="Blog Screen"></p>
+<p>安装主题 Butterfly</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone -b master https://github.com/jerryc127/hexo-theme-butterfly.git themes/Butterfly</span><br></pre></td></tr></table></figure>
+
+<p>安装主题  <a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank" rel="noopener">Butterfly</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone -b master https://github.com/jerryc127/hexo-theme-butterfly.git themes/Butterfly</span><br></pre></td></tr></table></figure>
+
+<p>修改 blog 目录下的 <code>_config.yml</code>文件，应用主题 Butterfly</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">theme: Butterfly</span><br></pre></td></tr></table></figure>
+
+<p>配置 Butterfly 请查看 <a href="https://docs.jerryc.me/theme-config#dai-ma-gao-liang-zhu-ti" target="_blank" rel="noopener">Butterfly 配置文档</a>，可将 Butterfly 主题的配置文件复制到 <code>source/_data/butterfly</code>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir source/_data</span><br><span class="line">cp theme/Butterfly/_config source/_data/butterfly</span><br></pre></td></tr></table></figure>
+
+<p>安装使用该主题必要的包</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install hexo-renderer-jade hexo-renderer-stylus --save</span><br></pre></td></tr></table></figure>
+
+<p>配置博客根目录下的 <code>_config.yml</code>，添加：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">deploy:</span><br><span class="line">	type: git</span><br><span class="line">	reop: &lt;repository url&gt; #https://github.com/BingSlient/BingSlient.github.io.git</span><br><span class="line">	branch: [branch] #published</span><br></pre></td></tr></table></figure>
+
+<p>安装 git 发布的包</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm intall hexo-deployer-git --save</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用-Github-Page-仓库"><a href="#使用-Github-Page-仓库" class="headerlink" title="使用 Github Page 仓库"></a>使用 Github Page 仓库</h2><p>建立一个新的 Github Page 仓库作为用于托管个人博客内容。</p>
+<p>新建一个 Github 仓库，仓库名格式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">username.github.io</span><br></pre></td></tr></table></figure>
+
+<p><code>username</code> 为你的 Github 账户的用户名。</p>
+<h1 id="写博客"><a href="#写博客" class="headerlink" title="写博客"></a>写博客</h1><h2 id="创建一个新页面"><a href="#创建一个新页面" class="headerlink" title="创建一个新页面"></a>创建一个新页面</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo new [layout] &lt;title&gt;</span><br></pre></td></tr></table></figure>
+
+<p>Hexo 有三种默认布局：<code>post</code>、<code>page</code> 和 <code>draft</code>，它们分别对应不同的路径，自定义的其他布局和 <code>post</code> 相同，都将储存到 <code>source/_posts</code> 文件夹。</p>
+<table>
+<thead>
+<tr>
+<th align="left">布局</th>
+<th align="left">路径</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>post</code></td>
+<td align="left"><code>source/_posts</code></td>
+</tr>
+<tr>
+<td align="left"><code>page</code></td>
+<td align="left"><code>source</code></td>
+</tr>
+<tr>
+<td align="left"><code>draft</code></td>
+<td align="left"><code>source/_drafts</code></td>
+</tr>
+</tbody></table>
+<p>一般情况下都使用默认的布局，如下新建一篇名为 <code>Hello World</code>的博文</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo new Hello-World</span><br></pre></td></tr></table></figure>
+
+<p>打开 <code>source/_posts/Hello-World.md</code>，有如下内容：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: Hello-World</span><br><span class="line">date: 2019-08-08 00:42:26</span><br><span class="line">tags:</span><br><span class="line">---</span><br></pre></td></tr></table></figure>
+
+<p>这部分内容称为 <code>Front-matter</code>，用于定义生成网页的一些变量，Hexo 预定义的参数如下：</p>
+<table>
+<thead>
+<tr>
+<th align="left">参数</th>
+<th align="left">描述</th>
+<th align="left">默认值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left"><code>layout</code></td>
+<td align="left">布局</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><code>title</code></td>
+<td align="left">标题</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><code>date</code></td>
+<td align="left">建立日期</td>
+<td align="left">文件建立日期</td>
+</tr>
+<tr>
+<td align="left"><code>updated</code></td>
+<td align="left">更新日期</td>
+<td align="left">文件更新日期</td>
+</tr>
+<tr>
+<td align="left"><code>comments</code></td>
+<td align="left">开启文章的评论功能</td>
+<td align="left">true</td>
+</tr>
+<tr>
+<td align="left"><code>tags</code></td>
+<td align="left">标签（不适用于分页）</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><code>categories</code></td>
+<td align="left">分类（不适用于分页）</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><code>permalink</code></td>
+<td align="left">覆盖文章网址</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left"><code>keywords</code></td>
+<td align="left">仅用于 meta 标签和 Open Graph 的关键词（不推荐使用）</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>只有 post 类型的文章支持分类和标签，可以在 Front-matter 中设置。在其他系统中，分类和标签听起来很接近，但是在 Hexo 中两者有着明显的差别：分类具有顺序性和层次性，也就是说 <code>Foo, Bar</code> 不等于 <code>Bar, Foo</code>；而标签没有顺序和层次。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">categories:</span><br><span class="line">- Diary</span><br><span class="line">tags:</span><br><span class="line">- PS3</span><br><span class="line">- Games</span><br></pre></td></tr></table></figure>
+
+<p>使用额外的主题或者插件会有额外的参数，这些参数的设置需要参考相应的文档。</p>
+<p>使用喜欢的编辑器，完成博文的编辑，推荐使用 <a href="https://www.typora.io/" target="_blank" rel="noopener">Typora</a>。</p>
+<h2 id="生成静态文件"><a href="#生成静态文件" class="headerlink" title="生成静态文件"></a>生成静态文件</h2><p>完成博文 <code>.md</code> 文件的编辑后，需要生成其对应的网页文件：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo generate    	#同 hexo g</span><br></pre></td></tr></table></figure>
+
+<p><strong>监视文件变动</strong></p>
+<p>Hexo 能够监视文件变动并立即重新生成静态文件，在生成时会比对文件的 SHA1 checksum，只有变动的文件才会写入。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo generate --watch</span><br></pre></td></tr></table></figure>
+
+<h2 id="发布博文到-Github-Page"><a href="#发布博文到-Github-Page" class="headerlink" title="发布博文到 Github Page"></a>发布博文到 Github Page</h2><p>Hexo 使用简单命令就可以将生成网站内容部署到服务器上，这里我们使用 Github Page 作为这个服务器。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo deploy		#同 hexo d</span><br></pre></td></tr></table></figure>
+
+<p>执行上述命令，Hexo 会将内容推送到 Github 仓库 <code>https://github.com/username/username.github.io</code> 中。</p>
+<p>浏览器打开 <code>https://username.github.io</code> 即可访问个人博客了。</p>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><p>[1] <a href="https://hexo.io/docs/deployment" target="_blank" rel="noopener">Hexo Deployment</a></p>
+<p>[2] <a href="https://docs.jerryc.me/theme-config" target="_blank" rel="noopener">Butterfly 配置</a></p>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">BingSlient</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://bingslient.github.io/2019/08/06/使用Hexo 和Github搭建个人博客/">https://bingslient.github.io/2019/08/06/使用Hexo 和Github搭建个人博客/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://bingslient.github.io">BingSlient's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/hexo/">hexo    </a><a class="post-meta__tags" href="/tags/github-pages/">github pages    </a><a class="post-meta__tags" href="/tags/博客/">博客    </a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-buttom"><i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lozad post-qr-code__img" data-src="/img/wechat.jpg"><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lozad post-qr-code__img" data-src="/img/alipay.jpg"><div class="post-qr-code__desc">支付寶</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="prev-post pull-full"><a href="/2019/08/07/本地 web 服务器搭建之LEMP/"><img class="prev_cover lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/lemp.jpeg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">上一篇</div><div class="prev_info"><span>在 Ubuntu18.04 安装 LEMP，构建本地网站</span></div></a></div></nav></div></div><footer><div class="layout" id="footer"><div class="copyright">&copy;2019 By BingSlient</div><div class="framework-info"><span>驱动 </span><a href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly"><span>Butterfly</span></a></div><div class="footer_custom_text">Photo by <a href="https://unsplash.com/@pawel_czerwinski">Paweł Czerwiński</a> on Unsplash.</div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><section class="rightside" id="rightside"><i class="fa fa-book" id="readmode" title="阅读模式"> </i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换">繁</a><i class="fa fa-moon-o nightshift" id="nightshift" title="夜间模式"></i></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  CommonHTML: {
+    linebreaks: { automatic: true, width: "90% container" }
+  },
+  "HTML-CSS": { 
+    linebreaks: { automatic: true, width: "90% container" }
+  },
+  "SVG": { 
+    linebreaks: { automatic: true, width: "90% container" }
+  }
+});
+</script><script type="text/x-mathjax-config">MathJax.Hub.Queue(function() {
+  var all = MathJax.Hub.getAllJax(), i;
+  for (i=0; i < all.length; i += 1) {
+    all[i].SourceElement().parentNode.className += ' has-jax';
+  }
+});
+</script><script src="https://cdn.jsdelivr.net/npm/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css"><script>$(function () {
+  $('span.katex-display').wrap('<div class="katex-wrap"></div>')
+})</script><script src="/js/nightshift.js"></script><script id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zindex="-1" data-click="false"></script><script src="/js/tw_cn.js"></script><script>translateInitilization()
+
+</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@1.2.2/instantpage.min.js" type="module"></script></body></html>
