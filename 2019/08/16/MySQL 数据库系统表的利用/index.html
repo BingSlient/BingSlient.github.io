@@ -44,7 +44,7 @@
 
 <blockquote>
 <p><strong>问题：</strong>在设置 <code>secure_file_privilege=&#39;&#39;</code> 且目录权限为 <code>777</code> 后<code>load_file()</code> 无法读取文件</p>
-<p><strong>解决方案：</strong>Ubuntu 自带的强制访问控制系统 AppArmor 强制限制了每个程序可使用的资源，它并非针对用户，而是针对程序的，所以不论用户是否能访问某一资源，只要程序被 AppArmor 限制访问该资源，则程序就不能访问该资源。因此需要修改 AppArmor 针对于 MySQL 的访问控制策略，修改文件 <code>/etc/apparmor.d/usr.sbin.mysqld</code>，在其中添加需要访问的目录。</p>
+<p><strong>解决方案：</strong>Ubuntu 自带的强制访问控制系统 AppArmor 强制限制了每个程序可使用的资源，它并非针对用户，而是针对程序的，所以不论用户是否能访问某一资源，只要程序被 AppArmor 限制访问该资源，则程序就不能访问该资源。因此需要修改 AppArmor 针对于 MySQL 的访问控制策略，修改文件 <code>/etc/apparmor.d/usr.sbin.mysqld</code>，在其中添加需要访问的目录, 修改完成后，重新加载 AppArmor 配置：<code>sudo /etc/init.d/apparmor reload</code>。</p>
 <p><strong>参考：</strong><a href="https://stackoverflow.com/questions/4215231/load-data-infile-error-code-13" target="_blank" rel="noopener">https://stackoverflow.com/questions/4215231/load-data-infile-error-code-13</a></p>
 </blockquote>
 <h3 id="使用-LOAD-DATA-语句"><a href="#使用-LOAD-DATA-语句" class="headerlink" title="使用 LOAD DATA 语句"></a>使用 <code>LOAD DATA</code> 语句</h3><p><code>laod_file()</code>函数只能从 服务器中读取文件，<code>LOAD DATA</code>语句既能读取服务器的文件，也能读取 MySQL 客户机的文件，两种方式语法上稍有不同。</p>
