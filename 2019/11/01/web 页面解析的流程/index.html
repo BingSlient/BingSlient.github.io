@@ -1,0 +1,313 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><title>WEB 页面解析的流程总结 | BingSlient's Blog</title><meta name="description" content="WEB 页面解析的流程总结"><meta name="keywords" content="web 解析"><meta name="author" content="BingSlient"><meta name="copyright" content="BingSlient"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><meta http-equiv="x-dns-prefetch-control" content="on"><link rel="canonical" href="https://bingslient.github.io/2019/11/01/web 页面解析的流程/"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="WEB 页面解析的流程总结"><meta name="twitter:description" content="WEB 页面解析的流程总结"><meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg"><meta property="og:type" content="article"><meta property="og:title" content="WEB 页面解析的流程总结"><meta property="og:url" content="https://bingslient.github.io/2019/11/01/web 页面解析的流程/"><meta property="og:site_name" content="BingSlient's Blog"><meta property="og:description" content="WEB 页面解析的流程总结"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="next" title="在 Ubuntu18.04 安装 LEMP，构建本地网站" href="https://bingslient.github.io/2019/10/31/本地 web 服务器搭建之LEMP/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://xxx/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  highlight_copy: 'true',
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    title: '添加书签',
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天'
+
+  
+}</script></head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div class="auto_open" id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#背景"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#WEB-页面解析的总体流程"><span class="toc-number">2.</span> <span class="toc-text">WEB 页面解析的总体流程</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#DNS-基础"><span class="toc-number">3.</span> <span class="toc-text">DNS 基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#DNS-服务器的分层结构"><span class="toc-number">3.1.</span> <span class="toc-text">DNS 服务器的分层结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#域名解析流程"><span class="toc-number">3.2.</span> <span class="toc-text">域名解析流程</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#HTTP-协议基础"><span class="toc-number">4.</span> <span class="toc-text">HTTP 协议基础</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#HTTP-报文格式"><span class="toc-number">4.1.</span> <span class="toc-text">HTTP 报文格式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTP-请求报文格式"><span class="toc-number">4.1.1.</span> <span class="toc-text">HTTP 请求报文格式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HTTP-响应报文格式"><span class="toc-number">4.1.2.</span> <span class="toc-text">HTTP 响应报文格式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HTTP-请求方法"><span class="toc-number">4.2.</span> <span class="toc-text">HTTP 请求方法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HTTP-首部字段"><span class="toc-number">4.3.</span> <span class="toc-text">HTTP 首部字段</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#通用首部"><span class="toc-number">4.3.1.</span> <span class="toc-text">通用首部</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#请求首部"><span class="toc-number">4.3.2.</span> <span class="toc-text">请求首部</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#响应首部"><span class="toc-number">4.3.3.</span> <span class="toc-text">响应首部</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#实体首部"><span class="toc-number">4.3.4.</span> <span class="toc-text">实体首部</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#HTTP-响应的状态码"><span class="toc-number">4.4.</span> <span class="toc-text">HTTP 响应的状态码</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#潜在的安全问题"><span class="toc-number">5.</span> <span class="toc-text">潜在的安全问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">6.</span> <span class="toc-text">参考</span></a></li></ol></div></div></div><div id="content-outer"><div id="top-container" style="background-image: url(https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/post.jpg)"><div id="page-header"><span class="pull-left"> <a class="blog_title" id="site-name" href="/">BingSlient's Blog</a></span><div class="open toggle-menu pull-right"><div class="menu-icon-first"></div><div class="menu-icon-second"></div><div class="menu-icon-third"></div></div><span class="pull-right menus"><div class="mobile_author_icon"><img class="lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'"><div class="mobile_author-info__description"></div></div><hr><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> Home</span></a><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> Archives</span></a><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> Tags</span></a><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> Categories</span></a><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> About</span></a><script>document.body.addEventListener('touchstart', function(){ });</script></div></span><span class="pull-right"></span></div><div id="post-info"><div id="post-title"><div class="posttitle">WEB 页面解析的流程总结</div></div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2019-11-01<span class="post-meta__separator">|</span><i class="fa fa-history" aria-hidden="true"></i> 更新于 2019-11-01</time><span class="post-meta__separator mobile_hidden">|</span><span class="mobile_hidden"><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/web-安全基础/">web 安全基础</a></span><div class="post-meta-wordcount"><span>字数总计: </span><span class="word-count">3.1k</span><span class="post-meta__separator">|</span><span>阅读时长: 10 分钟</span><span class="post-meta__separator">|</span><span>阅读量: </span><span id="busuanzi_value_page_pv"></span></div></div></div></div><div class="layout layout_post" id="content-inner">   <article id="post"><div class="article-container" id="post-content"><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>为理解 web 页面解析的过程，总结其中涉及的基础知识和可能存在的安全问题。</p>
+<h1 id="WEB-页面解析的总体流程"><a href="#WEB-页面解析的总体流程" class="headerlink" title="WEB 页面解析的总体流程"></a>WEB 页面解析的总体流程</h1><p>客户端（浏览器）发起页面请求，主机对 地址中的DNS 域名进行解析，找到对应的 IP 地址，请求发送到 服务端，服务器根据请求内容发送响应给客户端，客户端收到响应，将内容渲染成网页。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/web_resolution.png" alt></p>
+<h1 id="DNS-基础"><a href="#DNS-基础" class="headerlink" title="DNS 基础"></a>DNS 基础</h1><p><code>DNS</code>（Domain Name System），即<code>域名解析系统</code>，用于为网络中的主机提供容易记忆、便于阅读的名字。网络主机虽然可以通过 IP 地址标识，但是在我们的日常生活中，我们当然更喜欢容易阅读的域名来标识一个主机，如 <a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a> 而不是一连串类似 183.232.231.174 的一串数字，但是域名无法被网络层的设备如路由器等识别，还需要转换成相应的 IP 地址，这就需要 <code>DNS</code> 提供这项服务。<code>DNS</code> 包含一个分布式、分层级的服务器组，用于提供将域名转换成 IP 地址的服务，另外还提供如何完成这一服务的协议；<code>DNS 协议</code>基于 <code>UDP</code> 进行通信，端口号为 <code>53</code>。</p>
+<h2 id="DNS-服务器的分层结构"><a href="#DNS-服务器的分层结构" class="headerlink" title="DNS 服务器的分层结构"></a>DNS 服务器的分层结构</h2><p>DNS 服务器采用分布式、分层的方式部署在世界各地。按照层级从高到低，DNS 服务器分为：<code>根域名服务器</code>（Root DNS Servers）、<code>顶级域名服务器</code>（TLD DNS Servers）、<code>权威域名服务器</code>（Authoritative DNS Servers），层级关系如下图：</p>
+<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/dns_hierachy.png" alt></p>
+<ul>
+<li><code>根域名服务器</code>：世界上有 13 个 <code>根域名服务器</code>，准确来说是 13 组服务器群组，服务器组中的每一个<code>根域名服务器</code>都有所有<code>顶级域名服务器</code>（com, org, gov …）的 IP 地址。</li>
+<li><code>顶级域名服务器</code>：为顶级域名如 com、org、net 等提供域名解析服务，每一个顶级域名都有相应的 <code>顶级域名服务器</code>，存放其所有子域名的 IP 地址。</li>
+<li><code>权威域名服务器</code>：各种组织机构，如企业、学校、政府组织等都需为其提供网络服务的主机取一个合适的域名，如 百度公司的 baidu.com，而主机的 IP 地址和域名的对应关系就保存至其<code>权威域名服务器</code>中。一般大公司和学校都会部署自己的<code>权威域名服务器</code>。</li>
+</ul>
+<h2 id="域名解析流程"><a href="#域名解析流程" class="headerlink" title="域名解析流程"></a>域名解析流程</h2><p>DNS 域名解析服务的总体流程如下图，查询主机需要知道 cis.poly.edu 的 IP 地址，按照图中的顺序依次进行域名解析。</p>
+<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/dns_resolution.png" alt></p>
+<p>以使用浏览器访问 <a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a> 为例，域名解析过程大致如下：</p>
+<ol>
+<li><strong>主机上的域名解析</strong>：浏览器首先查看浏览器中的缓存是否缓存了 <a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a> 的 IP 地址，如果存在则直接使用，不存在则在主机中的 DNS缓存 和 hosts 文件查找，如果存在则直接使用。</li>
+<li><strong>本地域名服务器上的解析</strong>：当在主机无法自己完成域名解析时，进一步向 <code>本地域名服务器</code>询问域名 <a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a> 的 IP 地址，<code>本地域名服务器</code>首先会查看服务器上的 DNS 缓存，如果存在相应的缓存则返回给查询主机，反之则进一步向 <code>根域名服务器</code>发起一个域名解析请求。<code>本地域名服务器</code>一般都是我们接入的网络的管理机构提供，如我们一般在家里都是用网络服务提供商（电信、移动、联通等）提供的网络接入服务，相应的<code>本地域名服务器</code>也由各个ISP提供，而当我们接入校园网时，则由学校提供。</li>
+<li><strong>根域名服务器上的解析</strong>：当根域名接收到<code>本地域名解析服务器</code>发起的域名解析请求后，<code>根域名服务器</code>返回 <a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a> 的顶级域名 <code>com</code> 的一个或多个 IP 地址，因为 <code>根域名服务器</code> 只负顶级域名的解析。</li>
+<li><strong>顶级域名服务器上的解析：</strong> 当 <code>本地域名服务器</code> 收到顶级域名 <code>com</code>的IP地址后，进一步 <code>com</code>的域名服务器发起一个域名解析请求，<code>顶级域名服务器</code>返回可以解析 <a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a> 的一个<code>权威域名服务器</code>地址。</li>
+<li><strong>权威域名服务器上的解析：</strong> 当 <code>本地域名服务器</code>收到 <a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a> 的 <code>权威域名服务器</code>的地址后，进一步向 <code>权威域名服务器</code>发起对 <a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a> 的域名解析请求，该<code>权威域名服务器</code>收到请求后，返回 <a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a> 的 IP 地址和 有效时间 <code>TTL</code> 给 <code>本地域名服务器</code>。</li>
+<li><strong>本地域名服务器上完成解析：</strong> <code>本地域名服务器</code>收到 <a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a> 的 IP 地址，放到服务器的 DNS 缓存中，设置缓存的 <code>TTL</code>，标识该 DNS记录的有效时间，最后返回 <a href="http://www.baidu.com的" target="_blank" rel="noopener">www.baidu.com的</a> IP 地址给查询主机。</li>
+</ol>
+<p>最终主机获得 <a href="http://www.baidu.com" target="_blank" rel="noopener">www.baidu.com</a> 的 IP 地址，并将本次查询的 DNS 记录缓存系统中的 DNS 缓存中，同样设置相应的<code>TTL</code>。</p>
+<h1 id="HTTP-协议基础"><a href="#HTTP-协议基础" class="headerlink" title="HTTP 协议基础"></a>HTTP 协议基础</h1><p>HTTP （HyperText Transfer Protocal，超文本传输协议） 是应用层协议，使用 TCP 协议进行数据传输，常用端口号为 80，用于实现 Web 客户端 和 Web 服务器之间的通信。HTTP 协议规定了客户端和服务端之间通信的报文格式以及数据交换的流程。</p>
+<img src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/web_struct.png" alt="1570461796961" style="zoom:80%;">
+
+<h2 id="HTTP-报文格式"><a href="#HTTP-报文格式" class="headerlink" title="HTTP 报文格式"></a>HTTP 报文格式</h2><p>HTTP 报文分为客户端发送的请求报文和服务端发送的响应报文，用于建立通信和数据传输。</p>
+<h3 id="HTTP-请求报文格式"><a href="#HTTP-请求报文格式" class="headerlink" title="HTTP 请求报文格式"></a>HTTP 请求报文格式</h3><p>HTTP 请求报文由三部分组成：</p>
+<ol>
+<li>请求行（Request line），声明请求方法、请求资源的URL路径、HTTP 版本号</li>
+<li>首部行（Header line），声明额外的信息，</li>
+<li>实体主体（Entity Body），存放需要传输的数据</li>
+</ol>
+<blockquote>
+<p>请求行和首部行，每行都以 回车（carriage return，cr）和换行符 （line feed，lf）结尾。</p>
+<p>首部行和实体主体之间有一空行，同样以回车和换行符结尾。</p>
+</blockquote>
+<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/http_req_mesg.png" alt></p>
+<p>一个简单示例：</p>
+<figure class="highlight http"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">GET</span> <span class="string">/somedir/page.html</span> HTTP/1.1</span><br><span class="line"><span class="attribute">Host</span>: www.someschool.edu</span><br><span class="line"><span class="attribute">Connection</span>: close</span><br><span class="line"><span class="attribute">User-agent</span>: Mozilla/5.0</span><br><span class="line"><span class="attribute">Accept-language</span>: fr</span><br></pre></td></tr></table></figure>
+
+<h3 id="HTTP-响应报文格式"><a href="#HTTP-响应报文格式" class="headerlink" title="HTTP 响应报文格式"></a>HTTP 响应报文格式</h3><p>HTTP 响应报文的格式和请求报文格式类似，也由三部分组成：</p>
+<ol>
+<li>状态行（Status line)，声明 HTTP 的版本号，响应的状态码和相应的状态消息</li>
+<li>首部行（Header line），声明额外信息</li>
+<li>实体主体（Entity body），存放需要传输的数据</li>
+</ol>
+<p><img src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/http_resp_mesg.png" alt></p>
+<p>一个简单示例：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">HTTP/1.1 <span class="number">200</span> OK</span><br><span class="line"><span class="attribute">Connection</span>: close</span><br><span class="line"><span class="attribute">Date</span>: Tue, 09 Aug 2011 15:44:04 GMT</span><br><span class="line"><span class="attribute">Server</span>: Apache/2.2.3 (CentOS)</span><br><span class="line"><span class="attribute">Last-Modified</span>: Tue, 09 Aug 2011 15:11:03 GMT</span><br><span class="line"><span class="attribute">Content-Length</span>: 6821</span><br><span class="line"><span class="attribute">Content-Type</span>: text/html</span><br><span class="line"></span><br><span class="line">(data data data data data ...)</span><br></pre></td></tr></table></figure>
+
+<h2 id="HTTP-请求方法"><a href="#HTTP-请求方法" class="headerlink" title="HTTP 请求方法"></a>HTTP 请求方法</h2><p>现有的 HTTP 请求方法共有 9 种，包括由 HTTP1.0 定义的  GET、HEAD 、POST 三种方法 和在 HTTP1.1 版本中新增的 PUT、DELETE、CONNECT、OPTIONS、TRACE 和 PATCH 6种方法。</p>
+<table>
+<thead>
+<tr>
+<th align="left">序号</th>
+<th align="left">方法</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">GET</td>
+<td align="left">请求指定的页面信息，并返回消息主体。</td>
+</tr>
+<tr>
+<td align="left">2</td>
+<td align="left">HEAD</td>
+<td align="left">类似于 GET 请求，只不过返回的响应中没有消息主体，仅获取报文的头部（状态行+首部行）</td>
+</tr>
+<tr>
+<td align="left">3</td>
+<td align="left">POST</td>
+<td align="left">向指定资源提交数据进行处理请求（例如提交表单或者上传文件）。数据被包含在消息实体中。POST 请求可能会导致新的资源的建立和/或已有资源的修改。</td>
+</tr>
+<tr>
+<td align="left">4</td>
+<td align="left">PUT</td>
+<td align="left">从客户端向服务器传送的数据取代指定的文档的内容。</td>
+</tr>
+<tr>
+<td align="left">5</td>
+<td align="left">DELETE</td>
+<td align="left">请求服务器删除指定的资源。</td>
+</tr>
+<tr>
+<td align="left">6</td>
+<td align="left">CONNECT</td>
+<td align="left">HTTP/1.1 协议中预留给能够将连接改为管道方式的代理服务器。</td>
+</tr>
+<tr>
+<td align="left">7</td>
+<td align="left">OPTIONS</td>
+<td align="left">允许客户端查看服务器的性能。</td>
+</tr>
+<tr>
+<td align="left">8</td>
+<td align="left">TRACE</td>
+<td align="left">回显服务器收到的请求，主要用于测试或诊断。</td>
+</tr>
+<tr>
+<td align="left">9</td>
+<td align="left">PATCH</td>
+<td align="left">是对 PUT 方法的补充，用来对已知资源进行局部更新 。</td>
+</tr>
+</tbody></table>
+<h2 id="HTTP-首部字段"><a href="#HTTP-首部字段" class="headerlink" title="HTTP 首部字段"></a>HTTP 首部字段</h2><p>HTTP 首部字段用于定义客户端和服务端通信的额外信息，按照首部的使用条件可分为四类：</p>
+<ol>
+<li>通用首部，可用于请求和响应报文中，和实体主体无关；</li>
+<li>请求首部，仅用于请求报文中，存放请求的详细信息，如请求资源的要求、请求主机的信息等；</li>
+<li>响应首部，仅用于响应报文中，存放响应的信息，如资源的位置，服务器等；</li>
+<li>实体首部，仅用于描述所数据的信息，即描述 HTTP 报文中 <code>Entity Body</code> 部分，如数据长度、类型等。</li>
+</ol>
+<h3 id="通用首部"><a href="#通用首部" class="headerlink" title="通用首部"></a>通用首部</h3><table>
+<thead>
+<tr>
+<th>常见首部</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Date</td>
+<td>HTTP 响应创建的时间和日期</td>
+</tr>
+<tr>
+<td>Cache-Control</td>
+<td>用于控制缓存机制，作用在请求或者响应中，作用是单一方向的，请求和响应中的缓存控制各不相干</td>
+</tr>
+<tr>
+<td>Connection</td>
+<td>是否建立可持续连接</td>
+</tr>
+</tbody></table>
+<h3 id="请求首部"><a href="#请求首部" class="headerlink" title="请求首部"></a>请求首部</h3><table>
+<thead>
+<tr>
+<th>常见首部</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Accept</td>
+<td>说明客户端能接收的内容类型，多个类型用逗号隔开，类型格式：<code>type/subtype;parameter=value</code></td>
+</tr>
+<tr>
+<td>Accept-*</td>
+<td>说明客户端能接收的字符集、编码、语言等。<code>Accept-Charset</code>、<code>Accept-Encoding</code>、<code>Accept-Language</code></td>
+</tr>
+<tr>
+<td>Cookie</td>
+<td>存放服务端发送给客户端的 HTTP Cookie</td>
+</tr>
+<tr>
+<td>Host</td>
+<td>所请求的服务器的域名</td>
+</tr>
+<tr>
+<td>User-Agent</td>
+<td>用户代理，标识客户端使用的应用、系统等信息</td>
+</tr>
+<tr>
+<td>Referer</td>
+<td>存放打开当前页面的源地址，方便服务端识别访问来源</td>
+</tr>
+<tr>
+<td>If-*</td>
+<td>条件请求，满足条件是请求才会成功，如 <code>If-Match</code>、<code>If-Modified-Since</code>、<code>If-None-Match</code>、<code>If-Range</code>、<code>If-Unmodified-Since</code></td>
+</tr>
+</tbody></table>
+<h3 id="响应首部"><a href="#响应首部" class="headerlink" title="响应首部"></a>响应首部</h3><table>
+<thead>
+<tr>
+<th>常见首部</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Age</td>
+<td>响应在代理缓存中存放的时间，以秒为单位，值为代理和通用首部 <code>Date</code>时间之差，为 0 值说明很有可能从服务器中获取</td>
+</tr>
+<tr>
+<td>Location</td>
+<td>说明资源重定向后的地址</td>
+</tr>
+<tr>
+<td>Server</td>
+<td>原始服务器使用的软件名称，如 <code>Server: Apache/2.4.1 (Unix)</code></td>
+</tr>
+<tr>
+<td>Allow</td>
+<td>声明请求资源可以使用的 HTTP 方法，如 <code>Allow: GET, POST, HEAD</code>，当响应的状态码为 <code>405</code>时必须带这个响应首部</td>
+</tr>
+</tbody></table>
+<h3 id="实体首部"><a href="#实体首部" class="headerlink" title="实体首部"></a>实体首部</h3><table>
+<thead>
+<tr>
+<th>常见首部</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Content-Length</td>
+<td>数据长度，整个 <code>Entity Body</code> 的字节数</td>
+</tr>
+<tr>
+<td>Content-Language</td>
+<td>数据显示时使用的语言，如 <code>Content-Language: en,zh</code></td>
+</tr>
+<tr>
+<td>Content-Encoding</td>
+<td>数据的压缩编码方式，如 <code>Content-Encoding: gzip</code></td>
+</tr>
+<tr>
+<td>Content-Type</td>
+<td>数据的 MIME 类型，如 <code>Content-Type: text/html; charset=utf-8</code></td>
+</tr>
+<tr>
+<td>Content-Location</td>
+<td>说明资源的一个可用地址，服务器上的资源通常会有多个版本的地址，如一个资源可能存放在 json、text 或者 csv 文件中，根据客户端能接受的数据类型，返回相应的资源，下次请求时可以直接使用 <code>Content-Location</code>提供的资源路径，如<code>Content-Location: /documents/foo.json</code></td>
+</tr>
+</tbody></table>
+<h2 id="HTTP-响应的状态码"><a href="#HTTP-响应的状态码" class="headerlink" title="HTTP 响应的状态码"></a>HTTP 响应的状态码</h2><table>
+<thead>
+<tr>
+<th>类型</th>
+<th>常见状态码</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1xx：信息</td>
+<td>100 Continue<br>101 Switching Proctocols</td>
+</tr>
+<tr>
+<td>2xx：成功</td>
+<td>200 OK：请求成功<br>201 Created：请求成功同时资源在服务器中创建<br>202 Accepted：请求已接受，但尚未处理完</td>
+</tr>
+<tr>
+<td>3xx：重定向</td>
+<td>301 Moved Permanently：页面永久转移到新 url<br>302 Moved Temporarily：页面临时转移到新 url</td>
+</tr>
+<tr>
+<td>4xx：客户端错误</td>
+<td>400 Bad Request：服务器不理解请求<br>401 Unauthorized：被请求的页面需要用户名和密码。<br>403 Forbidden：页面禁止访问<br>404 Not Found：没有找到请求的资源<br>405 Method Not Allowed：请求方法不被允许</td>
+</tr>
+<tr>
+<td>5xx：服务器错误</td>
+<td>500 Internal Server Error：请求未完成。服务器遇到不可预知的情况。<br>502 Bad Gateway：请求未完成。服务器从上游服务器收到一个无效的响应。<br>503 Service Unavailable：请求未完成，服务器临时过载或宕机。<br>504 Gateway Timeout：网关超时。</td>
+</tr>
+</tbody></table>
+<h1 id="潜在的安全问题"><a href="#潜在的安全问题" class="headerlink" title="潜在的安全问题"></a>潜在的安全问题</h1><p><strong>页面处理：</strong></p>
+<ul>
+<li>输入内容不做过滤</li>
+<li>不检查地址来源</li>
+<li>输出内容不作处理</li>
+</ul>
+<p><strong>DNS 解析：</strong></p>
+<ul>
+<li>域名服务器被劫持（可能性很小）</li>
+<li>DNS 缓存投毒</li>
+</ul>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li>Computer Networking A Top-Down Approach 6th Edition</li>
+<li><a href="https://blog.csdn.net/sun927/article/details/50764837" target="_blank" rel="noopener">Web页面的请求历程</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP" target="_blank" rel="noopener">HTTP tutorial</a></li>
+<li><a href="https://www.html5rocks.com/en/tutorials/internals/howbrowserswork/" target="_blank" rel="noopener">How browser work</a></li>
+<li><a href="https://blog.csdn.net/Lammonpeter/article/details/81358387" target="_blank" rel="noopener">DNS域名解析过程</a></li>
+</ol>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">BingSlient</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://bingslient.github.io/2019/11/01/web 页面解析的流程/">https://bingslient.github.io/2019/11/01/web 页面解析的流程/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://bingslient.github.io">BingSlient's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/web-解析/">web 解析    </a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-buttom"><i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lozad post-qr-code__img" data-src="/img/wechat.jpg"><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lozad post-qr-code__img" data-src="/img/alipay.jpg"><div class="post-qr-code__desc">支付寶</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="next-post pull-full"><a href="/2019/10/31/本地 web 服务器搭建之LEMP/"><img class="next_cover lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/lemp.jpeg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">下一篇</div><div class="next_info"><span>在 Ubuntu18.04 安装 LEMP，构建本地网站</span></div></a></div></nav></div></div><footer><div class="layout" id="footer"><div class="copyright">&copy;2019 By BingSlient</div><div class="framework-info"><span>驱动 </span><a href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly"><span>Butterfly</span></a></div><div class="footer_custom_text">Photo by <a href="https://unsplash.com/@pawel_czerwinski">Paweł Czerwiński</a> on Unsplash.</div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><section class="rightside" id="rightside"><i class="fa fa-book" id="readmode" title="阅读模式"> </i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换">繁</a><i class="fa fa-moon-o nightshift" id="nightshift" title="夜间模式"></i></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  CommonHTML: {
+    linebreaks: { automatic: true, width: "90% container" }
+  },
+  "HTML-CSS": { 
+    linebreaks: { automatic: true, width: "90% container" }
+  },
+  "SVG": { 
+    linebreaks: { automatic: true, width: "90% container" }
+  }
+});
+</script><script type="text/x-mathjax-config">MathJax.Hub.Queue(function() {
+  var all = MathJax.Hub.getAllJax(), i;
+  for (i=0; i < all.length; i += 1) {
+    all[i].SourceElement().parentNode.className += ' has-jax';
+  }
+});
+</script><script src="https://cdn.jsdelivr.net/npm/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css"><script>$(function () {
+  $('span.katex-display').wrap('<div class="katex-wrap"></div>')
+})</script><script src="/js/nightshift.js"></script><script id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zindex="-1" data-click="false"></script><script src="/js/tw_cn.js"></script><script>translateInitilization()
+
+</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@1.2.2/instantpage.min.js" type="module"></script></body></html>
