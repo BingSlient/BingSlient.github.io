@@ -1,0 +1,447 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><title>MySQL 数据库系统表的利用 | BingSlient's Blog</title><meta name="description" content="MySQL 数据库系统表的利用"><meta name="keywords" content="MySQL,MySQL 数据库系统表"><meta name="author" content="BingSlient"><meta name="copyright" content="BingSlient"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><meta http-equiv="x-dns-prefetch-control" content="on"><link rel="canonical" href="https://bingslient.github.io/2019/10/31/MySQL 数据库系统表的利用/"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="MySQL 数据库系统表的利用"><meta name="twitter:description" content="MySQL 数据库系统表的利用"><meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg"><meta property="og:type" content="article"><meta property="og:title" content="MySQL 数据库系统表的利用"><meta property="og:url" content="https://bingslient.github.io/2019/10/31/MySQL 数据库系统表的利用/"><meta property="og:site_name" content="BingSlient's Blog"><meta property="og:description" content="MySQL 数据库系统表的利用"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="prev" title="Python 中的正则表达式" href="https://bingslient.github.io/2019/10/31/Python-正则表达式/"><link rel="next" title="Kali Linux 使用国内源" href="https://bingslient.github.io/2019/10/31/Kali linux 使用国内源/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://xxx/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  highlight_copy: 'true',
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    title: '添加书签',
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天'
+
+  
+}</script></head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div class="auto_open" id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#背景"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL-读写文件"><span class="toc-number">2.</span> <span class="toc-text">MySQL 读写文件</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#读文件"><span class="toc-number">2.1.</span> <span class="toc-text">读文件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#使用-load-file-函数"><span class="toc-number">2.1.1.</span> <span class="toc-text">使用 load_file() 函数</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用-LOAD-DATA-语句"><span class="toc-number">2.1.2.</span> <span class="toc-text">使用 LOAD DATA 语句</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#写文件"><span class="toc-number">2.2.</span> <span class="toc-text">写文件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#使用-SELECT-INTO-OUTFILE-语句"><span class="toc-number">2.2.1.</span> <span class="toc-text">使用 SELECT INTO OUTFILE 语句</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#MySQL-数据库系统表"><span class="toc-number">3.</span> <span class="toc-text">MySQL 数据库系统表</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#information-schema-数据库"><span class="toc-number">3.1.</span> <span class="toc-text">information_schema 数据库</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#常用视图"><span class="toc-number">3.1.1.</span> <span class="toc-text">常用视图</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#视图信息利用"><span class="toc-number">3.1.2.</span> <span class="toc-text">视图信息利用</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#mysql-数据库"><span class="toc-number">3.2.</span> <span class="toc-text">mysql 数据库</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#用户密码爆破"><span class="toc-number">4.</span> <span class="toc-text">用户密码爆破</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">5.</span> <span class="toc-text">参考</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#附录"><span class="toc-number">6.</span> <span class="toc-text">附录</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQLsecure-file-priv-变量"><span class="toc-number">6.1.</span> <span class="toc-text">MySQLsecure_file_priv 变量</span></a></li></ol></li></ol></div></div></div><div id="content-outer"><div id="top-container" style="background-image: url(https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/post.jpg)"><div id="page-header"><span class="pull-left"> <a class="blog_title" id="site-name" href="/">BingSlient's Blog</a></span><div class="open toggle-menu pull-right"><div class="menu-icon-first"></div><div class="menu-icon-second"></div><div class="menu-icon-third"></div></div><span class="pull-right menus"><div class="mobile_author_icon"><img class="lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'"><div class="mobile_author-info__description"></div></div><hr><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> Home</span></a><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> Archives</span></a><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> Tags</span></a><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> Categories</span></a><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> About</span></a><script>document.body.addEventListener('touchstart', function(){ });</script></div></span><span class="pull-right"></span></div><div id="post-info"><div id="post-title"><div class="posttitle">MySQL 数据库系统表的利用</div></div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2019-10-31<span class="post-meta__separator">|</span><i class="fa fa-history" aria-hidden="true"></i> 更新于 2019-08-26</time><span class="post-meta__separator mobile_hidden">|</span><span class="mobile_hidden"><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/web-安全基础/">web 安全基础</a></span><div class="post-meta-wordcount"><span>字数总计: </span><span class="word-count">3.5k</span><span class="post-meta__separator">|</span><span>阅读时长: 14 分钟</span><span class="post-meta__separator">|</span><span>阅读量: </span><span id="busuanzi_value_page_pv"></span></div></div></div></div><div class="layout layout_post" id="content-inner">   <article id="post"><div class="article-container" id="post-content"><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p> <strong>学习目标：</strong></p>
+<ol>
+<li><p>如何利用数据库的功能读写文件，需要什么样的条件才可以读写；</p>
+</li>
+<li><p>学习数据库系统表的功能，如何利用 sql 语句查询库名、表名、字段名、内容以及当前用户等基本信息；</p>
+</li>
+<li><p>尝试查询出用户的 hash，并使用 hashcat 来对获取的 hash 进行暴力破解。</p>
+</li>
+</ol>
+<h1 id="MySQL-读写文件"><a href="#MySQL-读写文件" class="headerlink" title="MySQL 读写文件"></a>MySQL 读写文件</h1><h2 id="读文件"><a href="#读文件" class="headerlink" title="读文件"></a>读文件</h2><h3 id="使用-load-file-函数"><a href="#使用-load-file-函数" class="headerlink" title="使用 load_file() 函数"></a>使用 <code>load_file()</code> 函数</h3><p><code>load_file(file_name)</code> 函数读取文件内容，将内容以字符串的形式返回。</p>
+<p><strong>前提条件</strong>：</p>
+<ul>
+<li><code>secure_file_priv</code> 不为 NULL，使用 <code>select @@secure_file_priv</code>查看其值，值不为空字符串时，只能使用该目录进行文件的读写操作， 该值的设置见<a href="#附录">附录</a>；</li>
+<li>当前数据库用户具有 <code>FILE</code> 权限，使用 <code>show grants</code>查看；</li>
+<li>系统用户 <code>mysql</code> 对该文件可读（要考虑系统的访问控制策略），在Ubuntu-18.04使用 MySQL 时默认的系统用户是 <code>mysql</code>；</li>
+<li>读取文件的大小小于 <code>max_allowed_packet</code>，使用 <code>select @@max_allowed_packet</code>查看；</li>
+<li>文件存在服务器上。</li>
+</ul>
+<p>如果上述任一条件不满足，函数返回 <code>NULL</code> 值。</p>
+<p><strong>用法</strong>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select load_file(&apos;filename&apos;);</span><br></pre></td></tr></table></figure>
+
+<p><strong>例子：</strong>读取文件 <code>/mysql/test.csv</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select  @@secure_file_priv,@@max_allowed_packet;</span><br><span class="line">+--------------------+----------------------+</span><br><span class="line">| @@secure_file_priv | @@max_allowed_packet |</span><br><span class="line">+--------------------+----------------------+</span><br><span class="line">|                    |             16777216 |</span><br><span class="line">+--------------------+----------------------+</span><br><span class="line">mysql&gt; show grants;</span><br><span class="line">+----------------------------------------------------------------------------------------------+</span><br><span class="line">| Grants for user101@localhost                                                                 |</span><br><span class="line">+----------------------------------------------------------------------------------------------+</span><br><span class="line">| GRANT SELECT, INSERT, DELETE, CREATE, FILE ON *.* TO &apos;user101&apos;@&apos;localhost&apos; WITH GRANT OPTION |</span><br><span class="line">+----------------------------------------------------------------------------------------------+</span><br><span class="line">mysql&gt; select load_file(&apos;/mysql/test.csv&apos;);</span><br><span class="line">+------------------------------+</span><br><span class="line">| load_file(&apos;/mysql/test.csv&apos;) |</span><br><span class="line">+------------------------------+</span><br><span class="line">| 3,Hack</span><br><span class="line">4,World</span><br><span class="line">5,Surprise!</span><br><span class="line">  |</span><br><span class="line">+------------------------------+</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>问题：</strong>在设置 <code>secure_file_privilege=&#39;&#39;</code> 且目录权限为 <code>777</code> 后<code>load_file()</code> 无法读取文件</p>
+<p><strong>解决方案：</strong>Ubuntu 自带的强制访问控制系统 AppArmor 强制限制了每个程序可使用的资源，它并非针对用户，而是针对程序的，所以不论用户是否能访问某一资源，只要程序被 AppArmor 限制访问该资源，则程序就不能访问该资源。因此需要修改 AppArmor 针对于 MySQL 的访问控制策略，修改文件 <code>/etc/apparmor.d/usr.sbin.mysqld</code>，在其中添加需要访问的目录, 修改完成后，重新加载 AppArmor 配置：<code>sudo /etc/init.d/apparmor reload</code>。</p>
+<p><strong>参考：</strong><a href="https://stackoverflow.com/questions/4215231/load-data-infile-error-code-13" target="_blank" rel="noopener">https://stackoverflow.com/questions/4215231/load-data-infile-error-code-13</a></p>
+</blockquote>
+<h3 id="使用-LOAD-DATA-语句"><a href="#使用-LOAD-DATA-语句" class="headerlink" title="使用 LOAD DATA 语句"></a>使用 <code>LOAD DATA</code> 语句</h3><p><code>laod_file()</code>函数只能从 服务器中读取文件，<code>LOAD DATA</code>语句既能读取服务器的文件，也能读取 MySQL 客户机的文件，两种方式语法上稍有不同。</p>
+<p><strong>前提条件：</strong>和 <code>load_file()</code> 函数使用条件相同，但通过使用 <code>LOCAL</code> 语句从客户主机读取文件内容。</p>
+<p><strong>用法：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">#[] 中的内容为可选内容</span><br><span class="line">LOAD DATA</span><br><span class="line">    [LOW_PRIORITY | CONCURRENT] [LOCAL] #使用 LOCAL 表示从客户主机读取文件，要设置 mysqld 中的系统变量 local_infile</span><br><span class="line">    INFILE &apos;file_name&apos;</span><br><span class="line">    [REPLACE | IGNORE]</span><br><span class="line">    INTO TABLE tbl_name</span><br><span class="line">    [CHARACTER SET charset_name] #处理文件的字符集</span><br><span class="line">    [&#123;FIELDS | COLUMNS&#125;  #描述每一列的格式</span><br><span class="line">        [TERMINATED BY &apos;string&apos;]</span><br><span class="line">        [[OPTIONALLY] ENCLOSED BY &apos;char&apos;]</span><br><span class="line">        [ESCAPED BY &apos;char&apos;]</span><br><span class="line">    ]</span><br><span class="line">    [LINES   #描述行的格式，不满足的行会被略过</span><br><span class="line">        [STARTING BY &apos;string&apos;]</span><br><span class="line">        [TERMINATED BY &apos;string&apos;]</span><br><span class="line">    ]</span><br><span class="line">    [IGNORE number &#123;LINES | ROWS&#125;] #忽略指定行或列</span><br><span class="line">    [(col_name_or_user_var</span><br><span class="line">        [, col_name_or_user_var] ...)] #写到数据表中的指定列</span><br><span class="line">    [SET col_name=&#123;expr | DEFAULT&#125;, </span><br><span class="line">        [, col_name=&#123;expr | DEFAULT&#125;] ...]</span><br></pre></td></tr></table></figure>
+
+<p><strong>例子：</strong>读取文件 <code>/mysql/test.csv</code> 到已有的数据表中。CSV文件内容如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">3,Hack</span><br><span class="line">4,World</span><br><span class="line">5,Surprise!</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from test;</span><br><span class="line">+----+------+</span><br><span class="line">| id | name |</span><br><span class="line">+----+------+</span><br><span class="line">|  1 | May  |</span><br><span class="line">|  2 | June |</span><br><span class="line">+----+------+</span><br><span class="line"></span><br><span class="line">mysql&gt; load data infile &apos;/mysql/test.csv&apos; into table test fields terminated by &apos;,&apos;;</span><br><span class="line">Query OK, 3 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; select * from test;                                                     </span><br><span class="line">| id | name      |</span><br><span class="line">+----+-----------+</span><br><span class="line">|  1 | May       |</span><br><span class="line">|  2 | June      |</span><br><span class="line">|  3 | Hack      |</span><br><span class="line">|  4 | World     |</span><br><span class="line">|  5 | Surprise! |</span><br><span class="line">+----+-----------+</span><br><span class="line">5 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<h2 id="写文件"><a href="#写文件" class="headerlink" title="写文件"></a>写文件</h2><h3 id="使用-SELECT-INTO-OUTFILE-语句"><a href="#使用-SELECT-INTO-OUTFILE-语句" class="headerlink" title="使用 SELECT INTO OUTFILE 语句"></a>使用 SELECT INTO OUTFILE 语句</h3><p><code>SELECT INTO OUTFILE</code> 和 <code>LOAD DATA</code> 这两条语句是完全互补的，一个写文件，一个读文件，语句的语法也很相似。</p>
+<p><strong>前提条件：</strong></p>
+<ul>
+<li><code>secure_file_priv</code> 不为 <code>NULL</code>，使用 <code>select @@secure_file_priv</code>查看其值，值不为空字符串时，只能使用该目录进行文件的读写操作， 该值的设置见<a href="#附录">附录</a>；</li>
+<li>当前数据库用户具有 <code>FILE</code> 权限，使用 <code>show grants</code>查看；</li>
+<li>系统用户 <code>mysql</code> 对该文件可写（要考虑系统的访问控制策略），在Ubuntu-18.04使用 MySQL 时默认的系统用户是 <code>mysql</code>；</li>
+<li>读取文件的大小小于 <code>max_allowed_packet</code>，使用 <code>select @@max_allowed_packet</code>查看；</li>
+<li>文件不存在。</li>
+</ul>
+<p><strong>用法：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#[] 中的内容为可选内容</span><br><span class="line">SELECT select_expr...</span><br><span class="line">	INTO OUTFILE &apos;file_name&apos;</span><br><span class="line">    [CHARACTER SET charset_name] #处理文件的字符集</span><br><span class="line">    [&#123;FIELDS | COLUMNS&#125;  #描述每一列的格式</span><br><span class="line">        [TERMINATED BY &apos;string&apos;]</span><br><span class="line">        [[OPTIONALLY] ENCLOSED BY &apos;char&apos;]</span><br><span class="line">        [ESCAPED BY &apos;char&apos;]</span><br><span class="line">    ]</span><br><span class="line">    [LINES   #描述行的格式</span><br><span class="line">        [STARTING BY &apos;string&apos;]</span><br><span class="line">        [TERMINATED BY &apos;string&apos;]</span><br><span class="line">    ]</span><br></pre></td></tr></table></figure>
+
+<p><strong>例子：</strong>写数据表到 CSV 文件中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from comments;</span><br><span class="line">+----+---------------------------+</span><br><span class="line">| id | comment                   |</span><br><span class="line">+----+---------------------------+</span><br><span class="line">|  1 | test                      |</span><br><span class="line">|  2 | hhhh                      |</span><br><span class="line">|  3 | Need lots of improvements |</span><br><span class="line">+----+---------------------------+</span><br><span class="line">3 rows in set (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; select comment from comments where id&gt;1 into outfile &apos;/mysql/comments.csv&apos; fields terminated by &apos;,&apos;;</span><br><span class="line">Query OK, 2 rows affected (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<p><code>/mysql/comments.csv</code> 内容：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hhhh</span><br><span class="line">Need lots of improvements</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注:</strong></p>
+<p>使用 <code>SELECT INTO DUMPFILE</code> 可将文件内容写成一行.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&gt;mysql&gt; select comment from comments where id&gt;1 into dumpfile &apos;/mysql/comments&apos;;</span><br><span class="line">&gt;Query OK, 2 rows affected (0.00 sec) </span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<blockquote>
+<p><code>/mysql/comments.csv</code> 内容：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt;hhhhNeed lots of improvements</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<blockquote>
+<p>如果想把远程数据库的查询结果写到本地主机文件上, 可用:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt;mysql -h hostname -P portnum -u username -p databsename -e &quot;SELECT ...&quot; &gt; file_name</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h1 id="MySQL-数据库系统表"><a href="#MySQL-数据库系统表" class="headerlink" title="MySQL 数据库系统表"></a>MySQL 数据库系统表</h1><p>MySQL-5.7 默认的系统表/视图 放在4个数据库/schema 中,。</p>
+<blockquote>
+<p>在 MySQL 中 <code>schema</code> 和 <code>database</code> 是一样的就不做区分, 但实际上是有区别的，可以参考<a href="https://database.guide/what-is-a-database-schema/" target="_blank" rel="noopener">这篇文章</a>。</p>
+<p>视图也称为虚表，是为了便于查询某些信息，建立在查询结果之上的表，所以视图其实就是被保存起来的一次查询。视图和表的区别简单来说就是视图存储的是SQL查询语句执行的结果，以表的形式存在但在数据库中并没有这个表。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th align="left">库名</th>
+<th align="left">视图数量</th>
+<th align="left">基表数量</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">information_schema</td>
+<td align="left">61</td>
+<td align="left">0</td>
+</tr>
+<tr>
+<td align="left">mysql</td>
+<td align="left">0</td>
+<td align="left">31</td>
+</tr>
+<tr>
+<td align="left">performance_schema</td>
+<td align="left">0</td>
+<td align="left">87</td>
+</tr>
+<tr>
+<td align="left">sys</td>
+<td align="left">100</td>
+<td align="left">1(sys_config)</td>
+</tr>
+</tbody></table>
+<p>MySQL 数据库管理系统中的系统表很多，这里主要介绍和在SQL 注入中常的几个表和视图。</p>
+<h2 id="information-schema-数据库"><a href="#information-schema-数据库" class="headerlink" title="information_schema 数据库"></a><code>information_schema</code> 数据库</h2><p><code>information_schema</code>存放着 MySQL 服务器维护的所有数据库的详细信息, 包括数据库名、表名、列名、列的数据类型、访问权限等等。</p>
+<h3 id="常用视图"><a href="#常用视图" class="headerlink" title="常用视图"></a>常用视图</h3><p>在进行 SQL 注入时比较有用的几个视图：<code>SCHEMATA</code>、 <code>COLUMNS</code>、<code>TABLES</code>、<code>user_privileges</code>。</p>
+<p><code>schemata</code> 视图存放 MySQL 数据管理系统中的所有数据的基本信息，丛中可以获取所有数据库名字，数据库使用的字符集、排序规则（collation，数据库中数据进行排序时的规则，升序、降序，是否忽略大小写等）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from schemata;</span><br><span class="line">+--------------+--------------------+----------------------------+------------------------+----------+</span><br><span class="line">| CATALOG_NAME | SCHEMA_NAME        | DEFAULT_CHARACTER_SET_NAME | DEFAULT_COLLATION_NAME | SQL_PATH |</span><br><span class="line">+--------------+--------------------+----------------------------+------------------------+----------+</span><br><span class="line">| def          | information_schema | utf8                       | utf8_general_ci        | NULL     |</span><br><span class="line">| def          | mysql              | latin1                     | latin1_swedish_ci      | NULL     |</span><br><span class="line">| def          | performance_schema | utf8                       | utf8_general_ci        | NULL     |</span><br><span class="line">| def          | sys                | utf8                       | utf8_general_ci        | NULL     |</span><br><span class="line">| def          | webdb101           | latin1                     | latin1_swedish_ci      | NULL     |</span><br><span class="line">+--------------+--------------------+----------------------------+------------------------+----------+</span><br></pre></td></tr></table></figure>
+
+<p><code>columns</code> 视图存放列相关的信息，常用字段 <code>table_schema</code>(数据库名）, <code>table_name</code>（表名），<code>column_name</code>（列名）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; desc columns;</span><br><span class="line">+--------------------------+---------------------+------+-----+---------+-------+</span><br><span class="line">| Field                    | Type                | Null | Key | Default | Extra |</span><br><span class="line">+--------------------------+---------------------+------+-----+---------+-------+</span><br><span class="line">| TABLE_CATALOG            | varchar(512)        | NO   |     |         |       |</span><br><span class="line">| TABLE_SCHEMA             | varchar(64)         | NO   |     |         |       |</span><br><span class="line">| TABLE_NAME               | varchar(64)         | NO   |     |         |       |</span><br><span class="line">| COLUMN_NAME              | varchar(64)         | NO   |     |         |       |</span><br><span class="line">| ORDINAL_POSITION         | bigint(21) unsigned | NO   |     | 0       |       |</span><br><span class="line">| COLUMN_DEFAULT           | longtext            | YES  |     | NULL    |       |</span><br><span class="line">| IS_NULLABLE              | varchar(3)          | NO   |     |         |       |</span><br><span class="line">| DATA_TYPE                | varchar(64)         | NO   |     |         |       |</span><br><span class="line">| CHARACTER_MAXIMUM_LENGTH | bigint(21) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| CHARACTER_OCTET_LENGTH   | bigint(21) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| NUMERIC_PRECISION        | bigint(21) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| NUMERIC_SCALE            | bigint(21) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| DATETIME_PRECISION       | bigint(21) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| CHARACTER_SET_NAME       | varchar(32)         | YES  |     | NULL    |       |</span><br><span class="line">| COLLATION_NAME           | varchar(32)         | YES  |     | NULL    |       |</span><br><span class="line">| COLUMN_TYPE              | longtext            | NO   |     | NULL    |       |</span><br><span class="line">| COLUMN_KEY               | varchar(3)          | NO   |     |         |       |</span><br><span class="line">| EXTRA                    | varchar(30)         | NO   |     |         |       |</span><br><span class="line">| PRIVILEGES               | varchar(80)         | NO   |     |         |       |</span><br><span class="line">| COLUMN_COMMENT           | varchar(1024)       | NO   |     |         |       |</span><br><span class="line">| GENERATION_EXPRESSION    | longtext            | NO   |     | NULL    |       |</span><br><span class="line">+--------------------------+---------------------+------+-----+---------+-------+</span><br></pre></td></tr></table></figure>
+
+<p><code>tables</code> 存放表相关的信息，常用字段 <code>table_schema</code>(数据库名）, <code>table_name</code>（表名）。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; desc tables;</span><br><span class="line">+-----------------+---------------------+------+-----+---------+-------+</span><br><span class="line">| Field           | Type                | Null | Key | Default | Extra |</span><br><span class="line">+-----------------+---------------------+------+-----+---------+-------+</span><br><span class="line">| TABLE_CATALOG   | varchar(512)        | NO   |     |         |       |</span><br><span class="line">| TABLE_SCHEMA    | varchar(64)         | NO   |     |         |       |</span><br><span class="line">| TABLE_NAME      | varchar(64)         | NO   |     |         |       |</span><br><span class="line">| TABLE_TYPE      | varchar(64)         | NO   |     |         |       |</span><br><span class="line">| ENGINE          | varchar(64)         | YES  |     | NULL    |       |</span><br><span class="line">| VERSION         | bigint(21) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| ROW_FORMAT      | varchar(10)         | YES  |     | NULL    |       |</span><br><span class="line">| TABLE_ROWS      | bigint(21) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| AVG_ROW_LENGTH  | bigint(21) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| DATA_LENGTH     | bigint(21) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| MAX_DATA_LENGTH | bigint(21) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| INDEX_LENGTH    | bigint(21) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| DATA_FREE       | bigint(21) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| AUTO_INCREMENT  | bigint(21) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| CREATE_TIME     | datetime            | YES  |     | NULL    |       |</span><br><span class="line">| UPDATE_TIME     | datetime            | YES  |     | NULL    |       |</span><br><span class="line">| CHECK_TIME      | datetime            | YES  |     | NULL    |       |</span><br><span class="line">| TABLE_COLLATION | varchar(32)         | YES  |     | NULL    |       |</span><br><span class="line">| CHECKSUM        | bigint(21) unsigned | YES  |     | NULL    |       |</span><br><span class="line">| CREATE_OPTIONS  | varchar(255)        | YES  |     | NULL    |       |</span><br><span class="line">| TABLE_COMMENT   | varchar(2048)       | NO   |     |         |       |</span><br><span class="line">+-----------------+---------------------+------+-----+---------+-------+</span><br><span class="line">21 rows in set (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<p><code>user_privileges</code> 存放用户的权限信息。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; desc information_schema.user_privileges;</span><br><span class="line">+----------------+--------------+------+-----+---------+-------+</span><br><span class="line">| Field          | Type         | Null | Key | Default | Extra |</span><br><span class="line">+----------------+--------------+------+-----+---------+-------+</span><br><span class="line">| GRANTEE        | varchar(81)  | NO   |     |         |       |  #被授权的用户名</span><br><span class="line">| TABLE_CATALOG  | varchar(512) | NO   |     |         |       |</span><br><span class="line">| PRIVILEGE_TYPE | varchar(64)  | NO   |     |         |       |  #权限名，如 SELECT、INSERT 等</span><br><span class="line">| IS_GRANTABLE   | varchar(3)   | NO   |     |         |       |  #是否授权，YES/NO</span><br><span class="line">+----------------+--------------+------+-----+---------+-------+</span><br></pre></td></tr></table></figure>
+
+<h3 id="视图信息利用"><a href="#视图信息利用" class="headerlink" title="视图信息利用"></a>视图信息利用</h3><p>用户权限查询</p>
+<ol>
+<li>获取当前用户名</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">selectmysql&gt; select user();</span><br><span class="line">+-------------------+</span><br><span class="line">| user()            |</span><br><span class="line">+-------------------+</span><br><span class="line">| user101@localhost |</span><br><span class="line">+-------------------+</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>获取用户权限</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from information_schema.user_privileges where grantee like &apos;%user101%&apos;;</span><br><span class="line">+-----------------------+---------------+----------------+--------------+</span><br><span class="line">| GRANTEE               | TABLE_CATALOG | PRIVILEGE_TYPE | IS_GRANTABLE |</span><br><span class="line">+-----------------------+---------------+----------------+--------------+</span><br><span class="line">| &apos;user101&apos;@&apos;localhost&apos; | def           | SELECT         | YES          |</span><br><span class="line">| &apos;user101&apos;@&apos;localhost&apos; | def           | INSERT         | YES          |</span><br><span class="line">| &apos;user101&apos;@&apos;localhost&apos; | def           | UPDATE         | YES          |</span><br><span class="line">| &apos;user101&apos;@&apos;localhost&apos; | def           | DELETE         | YES          |</span><br><span class="line">| &apos;user101&apos;@&apos;localhost&apos; | def           | CREATE         | YES          |</span><br><span class="line">| &apos;user101&apos;@&apos;localhost&apos; | def           | FILE           | YES          |</span><br><span class="line">+-----------------------+---------------+----------------+--------------+</span><br></pre></td></tr></table></figure>
+
+<p>注入时可以利用 information_schema 数据库进行信息查询，一般步骤有：</p>
+<ol>
+<li>获取数据库名</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select schema_name from information_schema.schemata;</span><br><span class="line">+--------------------+</span><br><span class="line">| schema_name        |</span><br><span class="line">+--------------------+</span><br><span class="line">| information_schema |</span><br><span class="line">| mysql              |</span><br><span class="line">| performance_schema |</span><br><span class="line">| sys                |</span><br><span class="line">| webdb101           |</span><br><span class="line">+--------------------+</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>获取表名</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select table_name from information_schema.tables where table_schema=&apos;webdb101&apos;;</span><br><span class="line">+------------+</span><br><span class="line">| table_name |</span><br><span class="line">+------------+</span><br><span class="line">| comments   |</span><br><span class="line">| test       |</span><br><span class="line">+------------+</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>获取列名</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select column_name from information_schema.columns where table_name=&apos;test&apos;;</span><br><span class="line">+-------------+</span><br><span class="line">| column_name |</span><br><span class="line">+-------------+</span><br><span class="line">| id          |</span><br><span class="line">| name        |</span><br><span class="line">+-------------+</span><br></pre></td></tr></table></figure>
+
+<h2 id="mysql-数据库"><a href="#mysql-数据库" class="headerlink" title="mysql 数据库"></a>mysql 数据库</h2><p>mysql 数据中存放的都是表，常用的表有 <code>user</code>、<code>db</code>。</p>
+<p><code>user</code>表中常用字段有 <code>user</code>、<code>host</code>、<code>authentication_string</code>（存储密码的字段，MySQL 版本相关，低一些的版本为 <code>password</code>）等。</p>
+<p>查询所有用户名、连接主机和密码哈希</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select user,host,authentication_string from mysql.user;</span><br><span class="line">+------------------+-----------+-------------------------------------------+</span><br><span class="line">| user             | host      | authentication_string                     |</span><br><span class="line">+------------------+-----------+-------------------------------------------+</span><br><span class="line">| root             | localhost |                                           |</span><br><span class="line">| mysql.session    | localhost | *THISISNOTAVALIDPASSWORDTHATCANBEUSEDHERE |</span><br><span class="line">| mysql.sys        | localhost | *THISISNOTAVALIDPASSWORDTHATCANBEUSEDHERE |</span><br><span class="line">| debian-sys-maint | localhost | *962236403F954BF9C92EBDBA0BC04F7CE7FCFB89 |</span><br><span class="line">| user101          | localhost | *6331E4D15433B998EF878BE017AE2A0878316CCC |</span><br><span class="line">+------------------+-----------+-------------------------------------------+</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注</strong>：</p>
+<p>在进行 sql 注入使用常常使用 <code>group_concat(col_name…)</code> 将多个列的信息连成一句话输出，便于回显到浏览器。</p>
+<p>如获取用户名及其密码的一条注入语句：</p>
+<p><code>select group_concat(user, authentication_string) from mysql.user</code></p>
+</blockquote>
+<h1 id="用户密码爆破"><a href="#用户密码爆破" class="headerlink" title="用户密码爆破"></a>用户密码爆破</h1><p>MySQL 用户的密码存储方式并非明文直接存储，而是经过 hash 函数加密进行存储的，从 <code>mysql.user</code>中获取到 MySQL 用户密码的哈希值后，需要使用工具进行破解。</p>
+<p><strong>工具：</strong><a href="https://github.com/hashcat/hashcat" target="_blank" rel="noopener">hashcat</a></p>
+<blockquote>
+<p>hashcat 号称最快的高级密码恢复套机（密码破解工具），支持多系统（Linux，OS，Windows），多平台（GPU，CPU，DSP等），支持多达 200 多种的 Hash 类型，支持使用同一系统的不同设备，支持分布式系统资源等，重要的是开源啊！</p>
+</blockquote>
+<p><strong>下载安装：</strong></p>
+<blockquote>
+<p>推荐在 Windows 上使用，最好不用虚拟机，这样安装最简单，而且能充分利用 hashcat 支持多设备的特点，在 Linux 上安装需要安装很多东西，而且问题特别多，除非特别需要，个人不建议。</p>
+</blockquote>
+<p><strong>使用：</strong></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./hashcat64.exe -m 300 -a 3 hashfile -o plaintxt --outfile-format=2 ?a?a?a?a?a?a</span><br></pre></td></tr></table></figure>
+
+<p><strong>参数：</strong></p>
+<p><code>-m 300</code>：hash 类型，200多种，详见： <code>hashcat --help</code>，300 选择的是 MySQL4/5 的hash</p>
+<p><code>-a 3</code>：攻击模式，总共5种，3 表示爆破模式，所有攻击模式如下表：</p>
+<table>
+<thead>
+<tr>
+<th>值</th>
+<th>攻击模式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>Straight：字典模式，从字典内容中依次选择密码候选，进行哈希计算，看是否和待破解的哈希值相同</td>
+</tr>
+<tr>
+<td>1</td>
+<td>Combination：组合模式，将两个字典的内容组合作为字典内容，可以通过 <code>-k</code>，<code>-j</code> 选项为两个字典添加额外规则</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Brute-force：爆破模式/掩码模式，使用掩码固定密码的字符集，减小爆破的候选密码数，掩码格式见下文。</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Hybrid Wordlist + Mask：混合模式（字典+掩码），通过字典后接掩码的方式构建最终的密码候选。</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Hybrid Mask + Wordlist：混合模式（掩码+字典），通过掩码后接字典的方式构建最终的密码候选，和上面的组合顺序相反。</td>
+</tr>
+</tbody></table>
+<p><code>-o pliantxt</code> ：破解后输出到文件 plaintxt</p>
+<p><code>--outfile-format=2</code>：输出文件格式，2表示只输出破解后的内容，所有可用格式如下表</p>
+<table>
+<thead>
+<tr>
+<th>值</th>
+<th>输出文件格式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>hash[:salt]</td>
+</tr>
+<tr>
+<td>2</td>
+<td>plain</td>
+</tr>
+<tr>
+<td>3</td>
+<td>hash[:salt]:plain</td>
+</tr>
+<tr>
+<td>4</td>
+<td>hex_plain</td>
+</tr>
+<tr>
+<td>5</td>
+<td>hash[:salt]:hex_plain</td>
+</tr>
+<tr>
+<td>6</td>
+<td>plain:hex_plain</td>
+</tr>
+<tr>
+<td>7</td>
+<td>hash[:salt]:plain:hex_plain</td>
+</tr>
+<tr>
+<td>8</td>
+<td>crackpos</td>
+</tr>
+<tr>
+<td>9</td>
+<td>hash[:salt]:crack_pos</td>
+</tr>
+<tr>
+<td>10</td>
+<td>plain:crack_pos</td>
+</tr>
+<tr>
+<td>11</td>
+<td>hash[:salt]:plain:crack_pos</td>
+</tr>
+<tr>
+<td>12</td>
+<td>hex_plain:crack_pos</td>
+</tr>
+<tr>
+<td>13</td>
+<td>hash[:salt]:hex_plain:crack_pos</td>
+</tr>
+<tr>
+<td>14</td>
+<td>plain:hex_plain:crack_pos</td>
+</tr>
+<tr>
+<td>15</td>
+<td>hash[:salt]:plain:hex_plain:crack_pos</td>
+</tr>
+</tbody></table>
+<p><code>?a?a?a?a?a?a</code>：这表示密码的掩码，所谓的掩码就是通过 ?[字符集代号]… 的格式表示密码的格式，包括密码的位数和每一位密码使用的字符集。?a 表示所有的键盘上可输入的字符，6个?a表示密码有6位。hashcat 内置字符集如下：</p>
+<table>
+<thead>
+<tr>
+<th>字符集代号</th>
+<th>字符集</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>l</td>
+<td>abcdefghijklmnopqrstuvwxyz</td>
+</tr>
+<tr>
+<td>u</td>
+<td>ABCDEFGHIJKLMNOPQRSTUVWXYZ</td>
+</tr>
+<tr>
+<td>d</td>
+<td>0123456789</td>
+</tr>
+<tr>
+<td>h</td>
+<td>0123456789abcdef</td>
+</tr>
+<tr>
+<td>H</td>
+<td>0123456789ABCDEF</td>
+</tr>
+<tr>
+<td>s</td>
+<td>!”#$%&amp;’()*+,-./:;&lt;=&gt;?@[]^_`{</td>
+</tr>
+<tr>
+<td>a</td>
+<td>?l?u?d?s</td>
+</tr>
+<tr>
+<td>b</td>
+<td>0x00 - 0xff</td>
+</tr>
+</tbody></table>
+<p>还通过选项自定义字符集，自定以的字符集对应的字符集代号为 1，2，3，4：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">--custom-charset1=CS  #同 -1 的短选项</span><br><span class="line">--custom-charset2=CS  #同 -2 </span><br><span class="line">--custom-charset3=CS  #同 -3</span><br><span class="line">--custom-charset4=CS  #同 -4</span><br></pre></td></tr></table></figure>
+
+<p>如果得知密码第一位为大写字母且不包含字符的8为密码，可自定义掩码，加快解密过程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hashcat -m 300 -a 3 -1 ?l?u?d hashfile ?u?1?1?1?1?1?1?1</span><br></pre></td></tr></table></figure>
+
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li><a href="https://blog.csdn.net/slip_666/article/details/79050454" target="_blank" rel="noopener">SQL注入-文件操作</a></li>
+<li><a href="https://dev.mysql.com/doc/refman/8.0/en/string-functions.html#function_load-file" target="_blank" rel="noopener">load-file</a></li>
+<li><a href="https://dev.mysql.com/doc/refman/5.5/en/load-data.html#load-data-input-preprocessing" target="_blank" rel="noopener">LOAD DATA 语法</a></li>
+<li><a href="https://cloud.tencent.com/developer/article/1340819" target="_blank" rel="noopener">MySQL常用系统表汇总</a></li>
+</ol>
+<h1 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h1><h2 id="MySQLsecure-file-priv-变量"><a href="#MySQLsecure-file-priv-变量" class="headerlink" title="MySQLsecure_file_priv 变量"></a>MySQL<code>secure_file_priv</code> 变量</h2><table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Command-Line Format</strong></td>
+<td><code>--secure-file-priv=dir_name</code></td>
+</tr>
+<tr>
+<td><strong>System Variable</strong></td>
+<td><code>secure_file_priv</code></td>
+</tr>
+<tr>
+<td><strong>Scope</strong></td>
+<td>Global</td>
+</tr>
+<tr>
+<td><strong>Dynamic</strong></td>
+<td>No，表示不能动态使用 <code>set</code> 命令进行设置，只能通过配置文件设置，如在 ~/.my.</td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>String</td>
+</tr>
+<tr>
+<td><strong>Default Value</strong> (&gt;= 5.7.6)</td>
+<td><code>platform specific</code></td>
+</tr>
+<tr>
+<td><strong>Default Value</strong> (&lt;= 5.7.5)</td>
+<td><code>empty string</code></td>
+</tr>
+<tr>
+<td><strong>Valid Values</strong> (&gt;= 5.7.6)</td>
+<td><code>empty string</code><br><code>dirname</code><br><code>NULL</code></td>
+</tr>
+<tr>
+<td><strong>Valid Values</strong> (&lt;= 5.7.5)</td>
+<td><code>empty string</code><br><code>dirname</code></td>
+</tr>
+</tbody></table>
+<p>该变量限制 MySQL 用户对文件的读写操作，可设置为以下值：</p>
+<ol>
+<li>空字符串；</li>
+<li>特定路径名；</li>
+<li>NULL，表示不允许文件的读写操作；</li>
+</ol>
+<p>具体可在 MySQL 启动配置文件 <code>/etc/mysql/my.cnf</code> 中设置如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[mysql_safe] #服务器启动脚本</span><br><span class="line">[mysqld] #服务器端配置</span><br><span class="line">secure_file_priv = &quot;&quot; #设置读取文件目录为任意目录</span><br></pre></td></tr></table></figure>
+
+<p><code>my.cnf</code> 文件中配置格式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[group] #常用的 group 有 mysqld：MySQL 服务器，client：MySQL 客户端，mysql_safe：服务器启动脚本</span><br><span class="line">opt_name #等同命令行中 --opt_name 选项</span><br><span class="line">opt_name=value #等同命令行中 --opt_name=vale</span><br></pre></td></tr></table></figure>
+
+<p>不同平台的默认值：</p>
+<table>
+<thead>
+<tr>
+<th><code>INSTALL_LAYOUT</code> Value</th>
+<th>Default <code>secure_file_priv</code> Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>STANDALONE</code></td>
+<td>empty</td>
+</tr>
+<tr>
+<td><code>DEB</code>, <code>RPM</code>, <code>SVR4</code></td>
+<td><code>/var/lib/mysql-files</code></td>
+</tr>
+<tr>
+<td>Otherwise</td>
+<td><code>mysql-files</code> under the <a href="https://dev.mysql.com/doc/refman/8.0/en/source-configuration-options.html#option_cmake_cmake_install_prefix" target="_blank" rel="noopener"><code>CMAKE_INSTALL_PREFIX</code></a>value</td>
+</tr>
+</tbody></table>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">BingSlient</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://bingslient.github.io/2019/10/31/MySQL 数据库系统表的利用/">https://bingslient.github.io/2019/10/31/MySQL 数据库系统表的利用/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://bingslient.github.io">BingSlient's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL    </a><a class="post-meta__tags" href="/tags/MySQL-数据库系统表/">MySQL 数据库系统表    </a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-buttom"><i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lozad post-qr-code__img" data-src="/img/wechat.jpg"><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lozad post-qr-code__img" data-src="/img/alipay.jpg"><div class="post-qr-code__desc">支付寶</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="prev-post pull-left"><a href="/2019/10/31/Python-正则表达式/"><img class="prev_cover lozad" data-src="https://github.com/BingSlient/learn-regex/raw/master/img/regexp-cn.png" onerror="onerror=null;src='/img/404.jpg'"><div class="label">上一篇</div><div class="prev_info"><span>Python 中的正则表达式</span></div></a></div><div class="next-post pull-right"><a href="/2019/10/31/Kali linux 使用国内源/"><img class="next_cover lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/default_cover.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">下一篇</div><div class="next_info"><span>Kali Linux 使用国内源</span></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span>相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2019/10/31/MySQL 函数及其利用/" title="MySQL 函数及其利用"><img class="relatedPosts_cover lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/default_cover.jpg"><div class="relatedPosts_title">MySQL 函数及其利用</div></a></div><div class="relatedPosts_item"><a href="/2019/10/31/SQLMAP数据库注入方法和绕过技巧/" title="SQL注入方法和绕过技巧"><img class="relatedPosts_cover lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/default_cover.jpg"><div class="relatedPosts_title">SQL注入方法和绕过技巧</div></a></div><div class="relatedPosts_item"><a href="/2019/10/31/关系数据库管理基础/" title="关系数据库管理基础"><img class="relatedPosts_cover lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/rdbms.jpg"><div class="relatedPosts_title">关系数据库管理基础</div></a></div></div><div class="clear_both"></div></div></div></div><footer><div class="layout" id="footer"><div class="copyright">&copy;2019 By BingSlient</div><div class="framework-info"><span>驱动 </span><a href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly"><span>Butterfly</span></a></div><div class="footer_custom_text">Photo by <a href="https://unsplash.com/@pawel_czerwinski">Paweł Czerwiński</a> on Unsplash.</div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><section class="rightside" id="rightside"><i class="fa fa-book" id="readmode" title="阅读模式"> </i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换">繁</a><i class="fa fa-moon-o nightshift" id="nightshift" title="夜间模式"></i></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  CommonHTML: {
+    linebreaks: { automatic: true, width: "90% container" }
+  },
+  "HTML-CSS": { 
+    linebreaks: { automatic: true, width: "90% container" }
+  },
+  "SVG": { 
+    linebreaks: { automatic: true, width: "90% container" }
+  }
+});
+</script><script type="text/x-mathjax-config">MathJax.Hub.Queue(function() {
+  var all = MathJax.Hub.getAllJax(), i;
+  for (i=0; i < all.length; i += 1) {
+    all[i].SourceElement().parentNode.className += ' has-jax';
+  }
+});
+</script><script src="https://cdn.jsdelivr.net/npm/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css"><script>$(function () {
+  $('span.katex-display').wrap('<div class="katex-wrap"></div>')
+})</script><script src="/js/nightshift.js"></script><script id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zindex="-1" data-click="false"></script><script src="/js/tw_cn.js"></script><script>translateInitilization()
+
+</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@1.2.2/instantpage.min.js" type="module"></script></body></html>

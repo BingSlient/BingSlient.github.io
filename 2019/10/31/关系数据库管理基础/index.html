@@ -1,0 +1,396 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"><title>关系数据库管理基础 | BingSlient's Blog</title><meta name="description" content="关系数据库管理基础"><meta name="keywords" content="MySQL,SQL"><meta name="author" content="BingSlient"><meta name="copyright" content="BingSlient"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.ico"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><meta http-equiv="x-dns-prefetch-control" content="on"><link rel="canonical" href="https://bingslient.github.io/2019/10/31/关系数据库管理基础/"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="关系数据库管理基础"><meta name="twitter:description" content="关系数据库管理基础"><meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/rdbms.jpg"><meta property="og:type" content="article"><meta property="og:title" content="关系数据库管理基础"><meta property="og:url" content="https://bingslient.github.io/2019/10/31/关系数据库管理基础/"><meta property="og:site_name" content="BingSlient's Blog"><meta property="og:description" content="关系数据库管理基础"><meta property="og:image" content="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/rdbms.jpg"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="prev" title="SQL注入方法和绕过技巧" href="https://bingslient.github.io/2019/10/31/SQLMAP数据库注入方法和绕过技巧/"><link rel="next" title="使用Hexo 和 Github Pages 搭建 个人博客" href="https://bingslient.github.io/2019/10/31/使用Hexo 和Github搭建个人博客/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://xxx/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"简"},
+  highlight_copy: 'true',
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    title: '添加书签',
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime_unit: '天'
+
+  
+}</script></head><body><i class="fa fa-arrow-right" id="toggle-sidebar" aria-hidden="true"></i><div class="auto_open" id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar"></div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#背景知识"><span class="toc-number">1.</span> <span class="toc-text">背景知识</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#SQL-简介"><span class="toc-number">1.1.</span> <span class="toc-text">SQL 简介</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关系数据库和关系数据库管理系统"><span class="toc-number">1.2.</span> <span class="toc-text">关系数据库和关系数据库管理系统</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#非关系数据库"><span class="toc-number">1.3.</span> <span class="toc-text">非关系数据库</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#关系数据库和非关系数据库的比较"><span class="toc-number">1.4.</span> <span class="toc-text">关系数据库和非关系数据库的比较</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#数据库管理的基本操作"><span class="toc-number">2.</span> <span class="toc-text">数据库管理的基本操作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#创建新用户"><span class="toc-number">2.1.</span> <span class="toc-text">创建新用户</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#查看数据库信息"><span class="toc-number">2.2.</span> <span class="toc-text">查看数据库信息</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#数据库操作"><span class="toc-number">2.3.</span> <span class="toc-text">数据库操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#库操作"><span class="toc-number">2.3.1.</span> <span class="toc-text">库操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#表操作"><span class="toc-number">2.3.2.</span> <span class="toc-text">表操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数据操作"><span class="toc-number">2.3.3.</span> <span class="toc-text">数据操作</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#参考资料"><span class="toc-number">3.</span> <span class="toc-text">参考资料</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#附录"><span class="toc-number">4.</span> <span class="toc-text">附录</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#SQL-约束"><span class="toc-number">4.1.</span> <span class="toc-text">SQL 约束</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MySQL-数据类型"><span class="toc-number">4.2.</span> <span class="toc-text">MySQL 数据类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#字符串类型"><span class="toc-number">4.2.1.</span> <span class="toc-text">字符串类型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#数值型"><span class="toc-number">4.2.2.</span> <span class="toc-text">数值型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#时间类型"><span class="toc-number">4.2.3.</span> <span class="toc-text">时间类型</span></a></li></ol></li></ol></li></ol></div></div></div><div id="content-outer"><div id="top-container" style="background-image: url(https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/rdbms.jpg)"><div id="page-header"><span class="pull-left"> <a class="blog_title" id="site-name" href="/">BingSlient's Blog</a></span><div class="open toggle-menu pull-right"><div class="menu-icon-first"></div><div class="menu-icon-second"></div><div class="menu-icon-third"></div></div><span class="pull-right menus"><div class="mobile_author_icon"><img class="lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/photo/avatar.jpg" onerror="onerror=null;src='/img/friend_404.gif'"><div class="mobile_author-info__description"></div></div><hr><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> Home</span></a><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> Archives</span></a><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> Tags</span></a><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> Categories</span></a><a class="site-page" href="/about/"><i class="fa-fw fa fa-heart"></i><span> About</span></a><script>document.body.addEventListener('touchstart', function(){ });</script></div></span><span class="pull-right"></span></div><div id="post-info"><div id="post-title"><div class="posttitle">关系数据库管理基础</div></div><div id="post-meta"><time class="post-meta__date"><i class="fa fa-calendar" aria-hidden="true"></i> 发表于 2019-10-31<span class="post-meta__separator">|</span><i class="fa fa-history" aria-hidden="true"></i> 更新于 2019-08-26</time><span class="post-meta__separator mobile_hidden">|</span><span class="mobile_hidden"><i class="fa fa-inbox post-meta__icon" aria-hidden="true"></i><a class="post-meta__categories" href="/categories/web-安全基础/">web 安全基础</a></span><div class="post-meta-wordcount"><span>字数总计: </span><span class="word-count">2.4k</span><span class="post-meta__separator">|</span><span>阅读时长: 11 分钟</span><span class="post-meta__separator">|</span><span>阅读量: </span><span id="busuanzi_value_page_pv"></span></div></div></div></div><div class="layout layout_post" id="content-inner">   <article id="post"><div class="article-container" id="post-content"><h1 id="背景知识"><a href="#背景知识" class="headerlink" title="背景知识"></a>背景知识</h1><h2 id="SQL-简介"><a href="#SQL-简介" class="headerlink" title="SQL 简介"></a>SQL 简介</h2><p><a href="https://en.wikipedia.org/wiki/SQL" target="_blank" rel="noopener">SQL </a>是英文 Structured Query Language 的所写，即是结构化查询语言。它用于管理关系数据库管理系统中的数据，如创建一个数据库、存储数据、读取数据、更新数据等。</p>
+<h2 id="关系数据库和关系数据库管理系统"><a href="#关系数据库和关系数据库管理系统" class="headerlink" title="关系数据库和关系数据库管理系统"></a>关系数据库和关系数据库管理系统</h2><p><a href="https://baike.baidu.com/item/%E5%85%B3%E7%B3%BB%E5%9E%8B%E6%95%B0%E6%8D%AE%E5%BA%93/8999831#reference-[1]-17286115-wrap" target="_blank" rel="noopener">关系数据库</a>是指使用<a href="https://en.wikipedia.org/wiki/Relational_database" target="_blank" rel="noopener">关系模型</a>来组织数据的数据库，而<strong>关系数据数据库管理系统（RDBMS）</strong>则是用来管理关系数据库的一个软件系统。</p>
+<p><strong>常见的关系数据库管理系统有：</strong></p>
+<p>商用：微软的 SQL Server 和 Access，Oracle，IBM DB2 等。</p>
+<p>开源：MySQL，PostgreSQL，SQLite，MariaDB 等。</p>
+<h2 id="非关系数据库"><a href="#非关系数据库" class="headerlink" title="非关系数据库"></a>非关系数据库</h2><p><a href="https://en.wikipedia.org/wiki/NoSQL" target="_blank" rel="noopener">非关系数据库（NoSQL）</a>是没有使用关系模型组织数据的数据库。和关系数据库使用行和列组成的表存储数据的方式不同，非关系数据库针对不同的数据的特点以不同的方式存储数据，如数据可以简单的存储为键值对、XML或者JSON等格式的文档、一个图等。</p>
+<p>根据不同的数据模型（数据的组织方式），非关系数据数据管理系统大致可分为以下几类：</p>
+<p>列式数据：<a href="https://en.wikipedia.org/wiki/Accumulo" target="_blank" rel="noopener">Accumulo</a>, <a href="https://en.wikipedia.org/wiki/Apache_Cassandra" target="_blank" rel="noopener">Cassandra</a>, <a href="https://en.wikipedia.org/wiki/Scylla_(database)" target="_blank" rel="noopener">Scylla</a>, <a href="https://en.wikipedia.org/wiki/HBase" target="_blank" rel="noopener">HBase</a>.</p>
+<p>文档数据：<a href="https://en.wikipedia.org/wiki/Apache_CouchDB" target="_blank" rel="noopener">Apache CouchDB</a>, <a href="https://en.wikipedia.org/wiki/ArangoDB" target="_blank" rel="noopener">ArangoDB</a>, <a href="https://en.wikipedia.org/wiki/BaseX" target="_blank" rel="noopener">BaseX</a>, <a href="https://en.wikipedia.org/wiki/Clusterpoint" target="_blank" rel="noopener">Clusterpoint</a>, <a href="https://en.wikipedia.org/wiki/Couchbase" target="_blank" rel="noopener">Couchbase</a>, <a href="https://en.wikipedia.org/wiki/Cosmos_DB" target="_blank" rel="noopener">Cosmos DB</a>, <a href="https://en.wikipedia.org/wiki/Lotus_Notes" target="_blank" rel="noopener">IBM Domino</a>, <a href="https://en.wikipedia.org/wiki/MarkLogic" target="_blank" rel="noopener">MarkLogic</a>, <a href="https://en.wikipedia.org/wiki/MongoDB" target="_blank" rel="noopener">MongoDB</a>, <a href="https://en.wikipedia.org/wiki/OrientDB" target="_blank" rel="noopener">OrientDB</a>, <a href="https://en.wikipedia.org/wiki/Qizx" target="_blank" rel="noopener">Qizx</a>, <a href="https://en.wikipedia.org/wiki/RethinkDB" target="_blank" rel="noopener">RethinkDB</a></p>
+<p>键值对数据：<a href="https://en.wikipedia.org/wiki/Aerospike_(database)" target="_blank" rel="noopener">Aerospike</a>, <a href="https://en.wikipedia.org/wiki/Apache_Ignite" target="_blank" rel="noopener">Apache Ignite</a>, <a href="https://en.wikipedia.org/wiki/ArangoDB" target="_blank" rel="noopener">ArangoDB</a>, <a href="https://en.wikipedia.org/wiki/Berkeley_DB" target="_blank" rel="noopener">Berkeley DB</a>, <a href="https://en.wikipedia.org/wiki/Couchbase" target="_blank" rel="noopener">Couchbase</a>, <a href="https://en.wikipedia.org/wiki/Dynamo_(storage_system)" target="_blank" rel="noopener">Dynamo</a>, <a href="https://en.wikipedia.org/wiki/FoundationDB" target="_blank" rel="noopener">FoundationDB</a>, <a href="https://en.wikipedia.org/wiki/InfinityDB" target="_blank" rel="noopener">InfinityDB</a>, <a href="https://en.wikipedia.org/wiki/MemcacheDB" target="_blank" rel="noopener">MemcacheDB</a>, <a href="https://en.wikipedia.org/wiki/MUMPS" target="_blank" rel="noopener">MUMPS</a>, <a href="https://en.wikipedia.org/wiki/Oracle_NoSQL_Database" target="_blank" rel="noopener">Oracle NoSQL Database</a>, <a href="https://en.wikipedia.org/wiki/OrientDB" target="_blank" rel="noopener">OrientDB</a>, <a href="https://en.wikipedia.org/wiki/Redis" target="_blank" rel="noopener">Redis</a>, <a href="https://en.wikipedia.org/wiki/Riak" target="_blank" rel="noopener">Riak</a>, <a href="https://en.wikipedia.org/wiki/SciDB" target="_blank" rel="noopener">SciDB</a>, SDBM/Flat File <a href="https://en.wikipedia.org/wiki/DBM_(computing)" target="_blank" rel="noopener">dbm</a>, <a href="https://en.wikipedia.org/wiki/Apache_ZooKeeper" target="_blank" rel="noopener">ZooKeeper</a></p>
+<p>图数据：<a href="https://en.wikipedia.org/wiki/AllegroGraph" target="_blank" rel="noopener">AllegroGraph</a>, <a href="https://en.wikipedia.org/wiki/ArangoDB" target="_blank" rel="noopener">ArangoDB</a>, <a href="https://en.wikipedia.org/wiki/InfiniteGraph" target="_blank" rel="noopener">InfiniteGraph</a>, <a href="https://en.wikipedia.org/wiki/Apache_Giraph" target="_blank" rel="noopener">Apache Giraph</a>, <a href="https://en.wikipedia.org/wiki/MarkLogic" target="_blank" rel="noopener">MarkLogic</a>, <a href="https://en.wikipedia.org/wiki/Neo4J" target="_blank" rel="noopener">Neo4J</a>, <a href="https://en.wikipedia.org/wiki/OrientDB" target="_blank" rel="noopener">OrientDB</a>, <a href="https://en.wikipedia.org/wiki/Virtuoso_Universal_Server" target="_blank" rel="noopener">Virtuoso</a></p>
+<h2 id="关系数据库和非关系数据库的比较"><a href="#关系数据库和非关系数据库的比较" class="headerlink" title="关系数据库和非关系数据库的比较"></a>关系数据库和非关系数据库的比较</h2><p><strong>关系数据库：</strong></p>
+<table>
+<thead>
+<tr>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>易于理解：结构化的数据存储（行列表）</td>
+<td>采用固定的表结构，导致可扩展性查</td>
+</tr>
+<tr>
+<td>便于操作：使用通用的 SQL 语言</td>
+<td>读写性能较差，在大数据环境下更为明显</td>
+</tr>
+<tr>
+<td>实现单表及多表的复杂查询</td>
+<td></td>
+</tr>
+</tbody></table>
+<p><strong>非关系数据库：</strong></p>
+<table>
+<thead>
+<tr>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>数据存储格式多样、灵活，扩展性强</td>
+<td>没有统一的数据管理语言，学习成本高</td>
+</tr>
+<tr>
+<td>读写速度快</td>
+<td>数据结构复杂，不支持类似多表的查询</td>
+</tr>
+<tr>
+<td>部署和维护成本低</td>
+<td></td>
+</tr>
+</tbody></table>
+<h1 id="数据库管理的基本操作"><a href="#数据库管理的基本操作" class="headerlink" title="数据库管理的基本操作"></a>数据库管理的基本操作</h1><p><strong>操作环境：</strong></p>
+<p>Ubuntu-18.04 + MySQL</p>
+<h2 id="创建新用户"><a href="#创建新用户" class="headerlink" title="创建新用户"></a>创建新用户</h2><p>以 root 身份登陆 mysql：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo mysql -u root #同 sudo mysql</span><br></pre></td></tr></table></figure>
+
+<p>创建新用户：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt;</span><br><span class="line">CREATE USER &apos;newuser&apos;@&apos;localhost&apos; #@后面跟着的是主机名，可以是远程服务器:www.server.com</span><br><span class="line">  IDENTIFIED BY &apos;user-password&apos;;</span><br><span class="line">GRANT INSERT,SELECT     #用户的权限，这里分配了插入和选择缺陷，使用所有权限 ALL（不推荐）</span><br><span class="line">  ON *.*				#全部数据库和表，可以指定数据库和表：database.* 或者 db.tablename</span><br><span class="line">  TO &apos;newuser&apos;@&apos;localhost&apos;</span><br><span class="line">  WITH GRANT OPTION; #具有授于其它用户权限的能力，授予权限仅限于自己被授予的权限，一般不用该选项</span><br></pre></td></tr></table></figure>
+
+<p>更新授权表：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; FLUSH PRIVILEGES; #是新用户的授权信息更新</span><br></pre></td></tr></table></figure>
+
+<h2 id="查看数据库信息"><a href="#查看数据库信息" class="headerlink" title="查看数据库信息"></a>查看数据库信息</h2><p>在 MySQL 中查看，当前所有用户和l连接的主机和其密码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT user,host,authentication_string FROM mysql.user # MySql 版本不同列名会有所区别</span><br></pre></td></tr></table></figure>
+
+<p>查看当前用户名：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT user();</span><br></pre></td></tr></table></figure>
+
+<p>查看当前登陆当 MySQL 数据库服务器的用户：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT user, host, db, command FROM information_schema.processlist;</span><br></pre></td></tr></table></figure>
+
+<p>查看所有数据库：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">show DATABASES;</span><br><span class="line">show DATABASSES LIKE “%s” #查看以 s 开头的数据库 </span><br><span class="line">show DATABASSES LIKE “s%” #查看以 s 结尾的数据库</span><br></pre></td></tr></table></figure>
+
+<p>查看数据库中所有表：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">show TABLES FROM dbname LIKE &quot;_[abc]%s&quot;; </span><br><span class="line">show FULL TABLES; 查看所有的表，同时显示表类型（VIEW OR BASE TABLE）</span><br></pre></td></tr></table></figure>
+
+<p>查看表的信息：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">desc table_name;</span><br></pre></td></tr></table></figure>
+
+<p>查看当前用户权限：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">show GRANTS;</span><br></pre></td></tr></table></figure>
+
+<p>其它基本信息：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">select @@version 	#MySQL 版本</span><br><span class="line">select @@host 	#主机名</span><br><span class="line">select @@database 	#当前数据库名</span><br><span class="line">select @@dataaddr 	#MySQL文件目录</span><br></pre></td></tr></table></figure>
+
+<h2 id="数据库操作"><a href="#数据库操作" class="headerlink" title="数据库操作"></a>数据库操作</h2><h3 id="库操作"><a href="#库操作" class="headerlink" title="库操作"></a>库操作</h3><p>以新用户身份登陆 mysql：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo mysql -u newuser -p</span><br></pre></td></tr></table></figure>
+
+<p>创建一个数据库：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CREATE DATABASE dbname;</span><br><span class="line">USE dbname; #选择该数据库</span><br></pre></td></tr></table></figure>
+
+<p>删除数据库：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP DATABASE dbname;</span><br></pre></td></tr></table></figure>
+
+<p>备份数据库：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BACKUP DATABASE databasename TO DISK = &apos;filepath&apos;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="表操作"><a href="#表操作" class="headerlink" title="表操作"></a>表操作</h3><p>创建一个表：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE table_name (</span><br><span class="line">    column1 数据类型 [约束],</span><br><span class="line">    column2 数据类型 [约束],</span><br><span class="line">    column3 数据类型 [约束],</span><br><span class="line">   ....</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>约束为可选项, SQL 约束 和 MySQL 数据类型见[附录](# 附录)。</p>
+<p>例子:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE tbname (</span><br><span class="line">	id int(255) NOT NULL AUTO_INCREMNET， 		</span><br><span class="line">	gender ENUM(male,female) NOT UNLL,  </span><br><span class="line">	name varchar(255)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>删除表：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DROP TABLE table_name;</span><br></pre></td></tr></table></figure>
+
+<p>修改表:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE table_name ADD column_name datatype;  #增加一列</span><br><span class="line">ALTER TABLE table_name DROP COLUMN column_name;	  #删除一列</span><br><span class="line"></span><br><span class="line">#修改列的数据类型</span><br><span class="line">ALTER TABLE table_name MODIFY COLUMN column_name datatype; #My SQL / Oracle (prior version 10G):</span><br><span class="line">ALTER TABLE table_name MODIFY column_name datatype; #Oracle 10G and later</span><br><span class="line">ALTER TABLE table_name ALTER COLUMN column_name datatype;  #MS SQL Server / MS Access</span><br></pre></td></tr></table></figure>
+
+<h3 id="数据操作"><a href="#数据操作" class="headerlink" title="数据操作"></a>数据操作</h3><p>增加一条数据：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">INSERT INTO table_name (column1, column2, column3, ...) VALUES (value1, value2, value3, ...);</span><br></pre></td></tr></table></figure>
+
+<p>删除一条数据：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM table_name WHERE condition;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意:</strong> 如果不带 WHERE 则会清空整张表的内容</p>
+</blockquote>
+<p>例子: 从 Customers 表中删除 CustomerName 列值为 Alfreds Futterkiste 的行:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DELETE FROM Customers WHERE CustomerName=&apos;Alfreds Futterkiste&apos;;</span><br></pre></td></tr></table></figure>
+
+<p>更改一条数据:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">UPDATE table_name</span><br><span class="line">SET column1 = value1, column2 = value2, ...</span><br><span class="line">WHERE condition;</span><br></pre></td></tr></table></figure>
+
+<p>例子: 更改 Custmers 表中 CustmerID 列值为 1 的行中的数据, 修改 ContactName 和 City 列:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">UPDATE Customers</span><br><span class="line">SET ContactName = &apos;Alfred Schmidt&apos;, City= &apos;Frankfurt&apos;</span><br><span class="line">WHERE CustomerID = 1;</span><br></pre></td></tr></table></figure>
+
+<p>查找数据:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">SELECT column1, column2, ...  #指定列名</span><br><span class="line">FROM table_name</span><br><span class="line">WHERE condition;  #指定条件</span><br></pre></td></tr></table></figure>
+
+<p>查看表的所有数据:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM tabel_name;</span><br></pre></td></tr></table></figure>
+
+<p>例子: 查找 Customers 表中所有符合 City 列值为 Berlin 的数据:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM Customers WHERE City=&quot;Berlin&quot;;</span><br></pre></td></tr></table></figure>
+
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ol>
+<li><a href="https://docs.microsoft.com/en-us/azure/architecture/data-guide/big-data/non-relational-data#object-data-stores" target="_blank" rel="noopener">Non-relational data and NoSQL</a></li>
+<li><a href="https://www.cnblogs.com/zylq-blog/p/7595979.html" target="_blank" rel="noopener">关系型数据库和非关系型数据的比较</a></li>
+<li><a href="https://www.w3schools.com/sql/sql_where.asp" target="_blank" rel="noopener">SQL Tutorial</a></li>
+</ol>
+<h1 id="附录"><a href="#附录" class="headerlink" title="附录"></a>附录</h1><h2 id="SQL-约束"><a href="#SQL-约束" class="headerlink" title="SQL 约束"></a>SQL 约束</h2><table>
+<thead>
+<tr>
+<th>约束</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>NOT NULL</td>
+<td>列值不能为空值</td>
+</tr>
+<tr>
+<td>UNIQUE</td>
+<td>列的值唯一</td>
+</tr>
+<tr>
+<td>PRIMARY KEY</td>
+<td>该列为主键, 主键的值不能为空且必须唯一, 每个表都必有且只有一个主键</td>
+</tr>
+<tr>
+<td>FOREIGN KEY</td>
+<td>该列为外键, 用于连接另一个表的主键</td>
+</tr>
+<tr>
+<td>CHECK</td>
+<td>约束列值的范围</td>
+</tr>
+<tr>
+<td>DEFAULT</td>
+<td>列的默认值</td>
+</tr>
+<tr>
+<td>AUTO_INCREMENT</td>
+<td>==MySQL 才是这样==,  每次添加新值时自动增加数值</td>
+</tr>
+<tr>
+<td>INDEX</td>
+<td>为列添加索引, 加快查找</td>
+</tr>
+</tbody></table>
+<p>例子(MySQL):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE Persons (</span><br><span class="line">    ID int NOT NULL,</span><br><span class="line">    LastName varchar(255) NOT NULL,</span><br><span class="line">    FirstName varchar(255),</span><br><span class="line">    Age int DEFAULT 0,</span><br><span class="line">    StudentID int,</span><br><span class="line">    PRIMARY KEY (ID),</span><br><span class="line">    INDEX name (LastName,FirstName),</span><br><span class="line">    CHECK(Age&gt;=0),</span><br><span class="line">    FOREIGN KEY (StudentID) REFERENCES Students(StudentID)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>使用索引进行查询(MySQL):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select FisrstName FROM Persons USE INDEX(name);</span><br></pre></td></tr></table></figure>
+
+<h2 id="MySQL-数据类型"><a href="#MySQL-数据类型" class="headerlink" title="MySQL 数据类型"></a>MySQL 数据类型</h2><h3 id="字符串类型"><a href="#字符串类型" class="headerlink" title="字符串类型"></a>字符串类型</h3><p>常用 CHAR、VARCHAR</p>
+<table>
+<thead>
+<tr>
+<th align="left">Data type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">CHAR(size)</td>
+<td align="left">A FIXED length string (can contain letters, numbers, and special characters). The <em>size</em> parameter specifies the column length in characters - can be from 0 to 255. Default is 1</td>
+</tr>
+<tr>
+<td align="left">VARCHAR(size)</td>
+<td align="left">A VARIABLE length string (can contain letters, numbers, and special characters). The <em>size</em> parameter specifies the maximum column length in characters - can be from 0 to 65535</td>
+</tr>
+<tr>
+<td align="left">BINARY(size)</td>
+<td align="left">Equal to CHAR(), but stores binary byte strings. The <em>size</em> parameter specifies the column length in bytes. Default is 1</td>
+</tr>
+<tr>
+<td align="left">VARBINARY(size)</td>
+<td align="left">Equal to VARCHAR(), but stores binary byte strings. The <em>size</em> parameter specifies the maximum column length in bytes.</td>
+</tr>
+<tr>
+<td align="left">TINYBLOB</td>
+<td align="left">For BLOBs (Binary Large OBjects). Max length: 255 bytes</td>
+</tr>
+<tr>
+<td align="left">TINYTEXT</td>
+<td align="left">Holds a string with a maximum length of 255 characters</td>
+</tr>
+<tr>
+<td align="left">TEXT(size)</td>
+<td align="left">Holds a string with a maximum length of 65,535 bytes</td>
+</tr>
+<tr>
+<td align="left">BLOB(size)</td>
+<td align="left">For BLOBs (Binary Large OBjects). Holds up to 65,535 bytes of data</td>
+</tr>
+<tr>
+<td align="left">MEDIUMTEXT</td>
+<td align="left">Holds a string with a maximum length of 16,777,215 characters</td>
+</tr>
+<tr>
+<td align="left">MEDIUMBLOB</td>
+<td align="left">For BLOBs (Binary Large OBjects). Holds up to 16,777,215 bytes of data</td>
+</tr>
+<tr>
+<td align="left">LONGTEXT</td>
+<td align="left">Holds a string with a maximum length of 4,294,967,295 characters</td>
+</tr>
+<tr>
+<td align="left">LONGBLOB</td>
+<td align="left">For BLOBs (Binary Large OBjects). Holds up to 4,294,967,295 bytes of data</td>
+</tr>
+<tr>
+<td align="left">ENUM(val1, val2, val3, …)</td>
+<td align="left">A string object that can have only one value, chosen from a list of possible values. You can list up to 65535 values in an ENUM list. If a value is inserted that is not in the list, a blank value will be inserted. The values are sorted in the order you enter them</td>
+</tr>
+<tr>
+<td align="left">SET(val1, val2, val3, …)</td>
+<td align="left">A string object that can have 0 or more values, chosen from a list of possible values. You can list up to 64 values in a SET list</td>
+</tr>
+</tbody></table>
+<h3 id="数值型"><a href="#数值型" class="headerlink" title="数值型"></a>数值型</h3><p>常用 SMALLINT、INT、BOOL、FLOAT</p>
+<table>
+<thead>
+<tr>
+<th align="left">Data type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">BIT(<em>size</em>)</td>
+<td align="left">A bit-value type. The number of bits per value is specified in <em>size</em>. The <em>size*parameter can hold a value from 1 to 64. The default value for *size</em> is 1.</td>
+</tr>
+<tr>
+<td align="left">TINYINT(<em>size</em>)</td>
+<td align="left">A very small integer. Signed range is from -128 to 127. Unsigned range is from 0 to 255. The <em>size</em> parameter specifies the maximum display width (which is 255)</td>
+</tr>
+<tr>
+<td align="left">BOOL</td>
+<td align="left">Zero is considered as false, nonzero values are considered as true.</td>
+</tr>
+<tr>
+<td align="left">BOOLEAN</td>
+<td align="left">Equal to BOOL</td>
+</tr>
+<tr>
+<td align="left">SMALLINT(<em>size</em>)</td>
+<td align="left">A small integer. Signed range is from -32768 to 32767. Unsigned range is from 0 to 65535. The <em>size</em> parameter specifies the maximum display width (which is 255)</td>
+</tr>
+<tr>
+<td align="left">MEDIUMINT(<em>size</em>)</td>
+<td align="left">A medium integer. Signed range is from -8388608 to 8388607. Unsigned range is from 0 to 16777215. The <em>size</em> parameter specifies the maximum display width (which is 255)</td>
+</tr>
+<tr>
+<td align="left">INT(<em>size</em>)</td>
+<td align="left">A medium integer. Signed range is from -2147483648 to 2147483647. Unsigned range is from 0 to 4294967295. The <em>size</em> parameter specifies the maximum display width (which is 255)</td>
+</tr>
+<tr>
+<td align="left">INTEGER(<em>size</em>)</td>
+<td align="left">Equal to INT(size)</td>
+</tr>
+<tr>
+<td align="left">BIGINT(<em>size</em>)</td>
+<td align="left">A large integer. Signed range is from -9223372036854775808 to 9223372036854775807. Unsigned range is from 0 to 18446744073709551615. The <em>size</em> parameter specifies the maximum display width (which is 255)</td>
+</tr>
+<tr>
+<td align="left">FLOAT(<em>size</em>, <em>d</em>)</td>
+<td align="left">A floating point number. The total number of digits is specified in <em>size</em>. The number of digits after the decimal point is specified in the <em>d</em> parameter. This syntax is deprecated in MySQL 8.0.17, and it will be removed in future MySQL versions</td>
+</tr>
+<tr>
+<td align="left">FLOAT(<em>p</em>)</td>
+<td align="left">A floating point number. MySQL uses the <em>p</em> value to determine whether to use FLOAT or DOUBLE for the resulting data type. If <em>p</em> is from 0 to 24, the data type becomes FLOAT(). If <em>p</em> is from 25 to 53, the data type becomes DOUBLE()</td>
+</tr>
+<tr>
+<td align="left">DOUBLE(<em>size</em>, <em>d</em>)</td>
+<td align="left">A normal-size floating point number. The total number of digits is specified in <em>size</em>. The number of digits after the decimal point is specified in the <em>d</em>parameter</td>
+</tr>
+<tr>
+<td align="left">DOUBLE PRECISION(<em>size</em>, <em>d</em>)</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">DECIMAL(<em>size</em>, <em>d</em>)</td>
+<td align="left">An exact fixed-point number. The total number of digits is specified in <em>size</em>. The number of digits after the decimal point is specified in the <em>d</em>parameter. The maximum number for <em>size</em> is 65. The maximum number for <em>d</em> is 30. The default value for <em>size</em> is 10. The default value for <em>d</em> is 0.</td>
+</tr>
+<tr>
+<td align="left">DEC(<em>size</em>, <em>d</em>)</td>
+<td align="left">Equal to DECIMAL(size,d)</td>
+</tr>
+</tbody></table>
+<h3 id="时间类型"><a href="#时间类型" class="headerlink" title="时间类型"></a>时间类型</h3><p>常用 DATE，TIME，DATATIME</p>
+<table>
+<thead>
+<tr>
+<th align="left">Data type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">DATE</td>
+<td align="left">A date. Format: YYYY-MM-DD. The supported range is from ‘1000-01-01’ to ‘9999-12-31’</td>
+</tr>
+<tr>
+<td align="left">DATETIME(<em>fsp</em>)</td>
+<td align="left">A date and time combination. Format: YYYY-MM-DD hh:mm:ss. The supported range is from ‘1000-01-01 00:00:00’ to ‘9999-12-31 23:59:59’. Adding DEFAULT and ON UPDATE in the column definition to get automatic initialization and updating to the current date and time</td>
+</tr>
+<tr>
+<td align="left">TIMESTAMP(<em>fsp</em>)</td>
+<td align="left">A timestamp. TIMESTAMP values are stored as the number of seconds since the Unix epoch (‘1970-01-01 00:00:00’ UTC). Format: YYYY-MM-DD hh:mm:ss. The supported range is from ‘1970-01-01 00:00:01’ UTC to ‘2038-01-09 03:14:07’ UTC. Automatic initialization and updating to the current date and time can be specified using DEFAULT CURRENT_TIMESTAMP and ON UPDATE CURRENT_TIMESTAMP in the column definition</td>
+</tr>
+<tr>
+<td align="left">TIME(<em>fsp</em>)</td>
+<td align="left">A time. Format: hh:mm:ss. The supported range is from ‘-838:59:59’ to ‘838:59:59’</td>
+</tr>
+</tbody></table>
+</div></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">BingSlient</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://bingslient.github.io/2019/10/31/关系数据库管理基础/">https://bingslient.github.io/2019/10/31/关系数据库管理基础/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://bingslient.github.io">BingSlient's Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/MySQL/">MySQL    </a><a class="post-meta__tags" href="/tags/SQL/">SQL    </a></div><div class="post_share"><div class="social-share" data-image="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/rdbms.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js@1.0.16/dist/js/social-share.min.js"></script></div></div><div class="post-reward"><a class="reward-buttom"><i class="fa fa-qrcode"></i> 打赏<div class="reward-main"><ul class="reward-all"><li class="reward-item"><img class="lozad post-qr-code__img" data-src="/img/wechat.jpg"><div class="post-qr-code__desc">微信</div></li><li class="reward-item"><img class="lozad post-qr-code__img" data-src="/img/alipay.jpg"><div class="post-qr-code__desc">支付寶</div></li></ul></div></a></div><nav class="pagination_post" id="pagination"><div class="prev-post pull-left"><a href="/2019/10/31/SQLMAP数据库注入方法和绕过技巧/"><img class="prev_cover lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/default_cover.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">上一篇</div><div class="prev_info"><span>SQL注入方法和绕过技巧</span></div></a></div><div class="next-post pull-right"><a href="/2019/10/31/使用Hexo 和Github搭建个人博客/"><img class="next_cover lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/default_cover.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="label">下一篇</div><div class="next_info"><span>使用Hexo 和 Github Pages 搭建 个人博客</span></div></a></div></nav><div class="relatedPosts"><div class="relatedPosts_headline"><i class="fa fa-fw fa-thumbs-up" aria-hidden="true"></i><span>相关推荐</span></div><div class="relatedPosts_list"><div class="relatedPosts_item"><a href="/2019/10/31/MySQL 函数及其利用/" title="MySQL 函数及其利用"><img class="relatedPosts_cover lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/default_cover.jpg"><div class="relatedPosts_title">MySQL 函数及其利用</div></a></div><div class="relatedPosts_item"><a href="/2019/10/31/SQLMAP数据库注入方法和绕过技巧/" title="SQL注入方法和绕过技巧"><img class="relatedPosts_cover lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/default_cover.jpg"><div class="relatedPosts_title">SQL注入方法和绕过技巧</div></a></div><div class="relatedPosts_item"><a href="/2019/10/31/MySQL 数据库系统表的利用/" title="MySQL 数据库系统表的利用"><img class="relatedPosts_cover lozad" data-src="https://cdn.jsdelivr.net/gh/BingSlient/cdn/cover/default_cover.jpg"><div class="relatedPosts_title">MySQL 数据库系统表的利用</div></a></div></div><div class="clear_both"></div></div></div></div><footer><div class="layout" id="footer"><div class="copyright">&copy;2019 By BingSlient</div><div class="framework-info"><span>驱动 </span><a href="http://hexo.io"><span>Hexo</span></a><span class="footer-separator">|</span><span>主题 </span><a href="https://github.com/jerryc127/hexo-theme-butterfly"><span>Butterfly</span></a></div><div class="footer_custom_text">Photo by <a href="https://unsplash.com/@pawel_czerwinski">Paweł Czerwiński</a> on Unsplash.</div></div></footer><i class="fa fa-arrow-up" id="go-up" aria-hidden="true"></i><section class="rightside" id="rightside"><i class="fa fa-book" id="readmode" title="阅读模式"> </i><i class="fa fa-plus" id="font_plus" title="放大字体"></i><i class="fa fa-minus" id="font_minus" title="缩小字体"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="简繁转换">繁</a><i class="fa fa-moon-o nightshift" id="nightshift" title="夜间模式"></i></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script><script src="https://cdn.jsdelivr.net/npm/lozad/dist/lozad.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({
+  tex2jax: {
+    inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+    processEscapes: true,
+    skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+  },
+  CommonHTML: {
+    linebreaks: { automatic: true, width: "90% container" }
+  },
+  "HTML-CSS": { 
+    linebreaks: { automatic: true, width: "90% container" }
+  },
+  "SVG": { 
+    linebreaks: { automatic: true, width: "90% container" }
+  }
+});
+</script><script type="text/x-mathjax-config">MathJax.Hub.Queue(function() {
+  var all = MathJax.Hub.getAllJax(), i;
+  for (i=0; i < all.length; i += 1) {
+    all[i].SourceElement().parentNode.className += ' has-jax';
+  }
+});
+</script><script src="https://cdn.jsdelivr.net/npm/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@latest/dist/katex.min.css"><script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css"><script>$(function () {
+  $('span.katex-display').wrap('<div class="katex-wrap"></div>')
+})</script><script src="/js/nightshift.js"></script><script id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zindex="-1" data-click="false"></script><script src="/js/tw_cn.js"></script><script>translateInitilization()
+
+</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@1.2.2/instantpage.min.js" type="module"></script></body></html>
